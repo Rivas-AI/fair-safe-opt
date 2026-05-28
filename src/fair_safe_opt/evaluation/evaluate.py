@@ -1,0 +1,28 @@
+from __future__ import annotations
+
+import torch
+from torch import nn
+
+from fair_safe_opt.metrics.classification import accuracy_from_logits
+from fair_safe_opt.metrics.fairness import (
+    demographic_parity_difference,
+    equal_opportunity_difference,
+)
+
+
+def evaluate_binary_classifier(
+    model: nn.Module,
+    x: torch.Tensor,
+    y: torch.Tensor,
+    sensitive: torch.Tensor,
+) -> dict[str, float]:
+    """Preliminary evaluation helper for small offline checks."""
+    model.eval()
+    with torch.no_grad():
+        logits = model(x)
+    preds = (torch.sigmoid(logits) >= 0.5).float()
+    return {
+        "accuracy": accuracy_from_logits(logits, y),
+        "demographic_parity_difference": demographic_parity_difference(preds, sensitive),
+        "equal_opportunity_difference": equal_opportunity_difference(y, preds, sensitive),
+    }

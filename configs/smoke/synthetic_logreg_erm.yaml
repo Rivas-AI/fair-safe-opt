@@ -1,0 +1,14 @@
+seed: 7
+device: cpu
+data:
+  kind: synthetic
+  n_samples: 96
+  n_continuous: 3
+  n_categorical: 2
+  batch_size: 32
+model:
+  kind: logistic
+training:
+  mode: erm
+  epochs: 3
+  learning_rate: 0.05

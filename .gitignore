@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Data and generated artifacts
+data/raw/
+data/cache/
+data/processed/
+results/**
+!results/README.md
+outputs/
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.joblib
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
