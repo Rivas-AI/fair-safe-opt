@@ -1,2 +1,4 @@
 # fair-safe-opt
-Fairness + Robustness Optimization
+
+Summer 2026 research repository for optimization methods in fair and adversarially robust machine learning.
+
