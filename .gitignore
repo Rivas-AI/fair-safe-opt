@@ -19,7 +19,9 @@ data/cache/
 data/processed/
 results/**
 !results/README.md
+results/runs/
 outputs/
+checkpoints/
 *.pt
 *.pth
 *.ckpt

@@ -1,3 +1,18 @@
+"""Planned FGSM attack implementation for Week 4.
+
+Expected input:
+    A binary PyTorch classifier, feature tensor, binary labels, epsilon,
+    a boolean continuous-feature mask, and optional train-set feature bounds.
+
+Expected output:
+    A perturbed feature tensor with categorical and one-hot positions unchanged.
+
+Status:
+    Planned implementation scaffold. Mask and clipping behavior are covered by
+    offline tests, but attack-strength and evaluation tests are deferred to Week
+    4 before this can support reported robust-accuracy results.
+"""
+
 from __future__ import annotations
 
 import torch

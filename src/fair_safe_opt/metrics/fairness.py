@@ -43,7 +43,11 @@ def demographic_parity_surrogate(
     probabilities: torch.Tensor,
     sensitive: torch.Tensor,
 ) -> torch.Tensor:
-    """Squared probability-mean demographic parity surrogate."""
+    """Squared probability-mean demographic parity surrogate.
+
+    Definition:
+        (E[p(x) | A = 0] - E[p(x) | A = 1]) ** 2
+    """
     r0 = _rate(probabilities, _as_bool_group(sensitive, 0), "group 0")
     r1 = _rate(probabilities, _as_bool_group(sensitive, 1), "group 1")
     return (r0 - r1).pow(2)
@@ -54,7 +58,11 @@ def equal_opportunity_surrogate(
     y_true: torch.Tensor,
     sensitive: torch.Tensor,
 ) -> torch.Tensor:
-    """Squared probability-mean equal opportunity surrogate."""
+    """Squared probability-mean equal opportunity surrogate.
+
+    Definition:
+        (E[p(x) | A = 0, Y = 1] - E[p(x) | A = 1, Y = 1]) ** 2
+    """
     positives = y_true.float() == 1
     r0 = _rate(probabilities, positives & _as_bool_group(sensitive, 0), "positive group 0")
     r1 = _rate(probabilities, positives & _as_bool_group(sensitive, 1), "positive group 1")

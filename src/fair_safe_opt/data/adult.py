@@ -1,3 +1,20 @@
+"""Planned Adult Income preprocessing implementation for Week 2.
+
+Expected input:
+    A later explicit call to `load_adult`, which retrieves UCI Adult via
+    `fetch_openml(data_id=1590, as_frame=True)`.
+
+Expected output:
+    Train, validation, and test arrays; binary target arrays; sensitive-attribute
+    arrays; feature names; train-set feature bounds; and a continuous-feature
+    mask for attack code.
+
+Status:
+    Planned implementation scaffold. This module must not be treated as a
+    validated experiment pipeline until Week 2 data-validation tests and summary
+    outputs are added. Automated initialization tests must not download Adult.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -35,7 +52,7 @@ def load_adult(
     random_state: int = 0,
     include_sensitive_feature: bool = False,
 ) -> AdultSplit:
-    """Preliminary Adult Income retrieval and preprocessing scaffold.
+    """Load the planned Adult split structure.
 
     This function may access the network through OpenML. It is intentionally not
     used by automated tests. Later experiment tasks should add dataset-specific

@@ -30,6 +30,31 @@ After making a small coherent change, run the required tests, commit, and push
 to `main`. Never force-push to `main`. Do not require feature branches or pull
 requests unless the PI later changes this rule.
 
+Daily work sequence:
+
+```bash
+git switch main
+git pull --ff-only origin main
+
+conda activate fair-safe-opt
+
+# edit files and run the task for the day
+
+pytest -q
+ruff check .
+ruff format --check .
+
+git add <specific-files>
+git commit -m "Brief description of completed work"
+git push origin main
+```
+
+Do not use `git add .` for ordinary weekly work; stage only intended files. Do
+not commit data files, generated checkpoints, large result outputs, or
+environment folders. If `git pull --ff-only` fails, stop and ask the PI before
+changing history. Since two people may use `main`, only one person should edit
+the same research module at a time unless they coordinate first.
+
 Major changes to the dataset, sensitive attribute, attack model, fairness
 metric, or training objective require a short decision record under
 `docs/decisions/`.

@@ -1,3 +1,18 @@
+"""Planned adversarial-training implementation for Week 5.
+
+Expected input:
+    A PyTorch binary classifier, tensors for features and labels, a
+    continuous-feature mask, and PGD training parameters.
+
+Expected output:
+    A training-history object with per-epoch losses and smoke-check accuracy.
+
+Status:
+    Planned implementation scaffold. This is not a validated research training
+    loop and should not be used for reported adversarial-training results until
+    Week 5 adds precise tests, configs, and experiment logging.
+"""
+
 from __future__ import annotations
 
 import torch

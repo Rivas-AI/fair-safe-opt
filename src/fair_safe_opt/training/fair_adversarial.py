@@ -1,3 +1,20 @@
+"""Planned fair-adversarial training helpers for Weeks 6 and 7.
+
+Expected input:
+    Binary logits, labels, sensitive-group indicators, selected fairness
+    surrogate (`dp` or `eopp`), and a penalty weight.
+
+Expected output:
+    Differentiable surrogate or penalized loss tensor for later training-loop
+    integration.
+
+Status:
+    Planned implementation scaffold. These helpers do not implement the full
+    fairness-constrained or fairness-penalized adversarial-training method. Week
+    6 and Week 7 must add training-loop tests, configs, logging, and method
+    documentation before use in reported experiments.
+"""
+
 from __future__ import annotations
 
 import torch

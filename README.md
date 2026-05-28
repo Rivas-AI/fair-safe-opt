@@ -36,26 +36,34 @@ does not configure CUDA, ROCm, or GPU-specific dependencies.
 `main` is the normal working branch for this project. Jeremy and the PI may
 commit directly to `main`.
 
-Before starting a work session:
+Daily work sequence:
 
 ```bash
 git switch main
 git pull --ff-only origin main
-```
 
-After making a small coherent change, run the required tests, commit, and push
-to `main`.
+conda activate fair-safe-opt
 
-```bash
-git status --short
-git add <changed-files>
-git commit -m "Short description of the change"
+# edit files and run the task for the day
+
+pytest -q
+ruff check .
+ruff format --check .
+
+git add <specific-files>
+git commit -m "Brief description of completed work"
 git push origin main
 ```
 
-Never force-push to `main`. Do not use feature branches or pull-request
-requirements unless the PI later changes this rule. Major changes to the
-dataset, sensitive attribute, attack model, fairness metric, or training
+Do not use `git add .` for ordinary weekly work; stage only intended files. Do
+not commit data files, generated checkpoints, large result outputs, or
+environment folders. Never force-push to `main`.
+
+If `git pull --ff-only` fails, stop and ask the PI before changing history. Do
+not use feature branches or pull-request requirements unless the PI later
+changes this rule. Since two people may use `main`, only one person should edit
+the same research module at a time unless they coordinate first. Major changes
+to the dataset, sensitive attribute, attack model, fairness metric, or training
 objective require a short decision record under `docs/decisions/`.
 
 ## Checks
@@ -84,6 +92,12 @@ smoke training. FGSM, PGD, the Adult loader, adversarial training,
 fairness-penalized adversarial loss, the MLP, and evaluation helpers are present
 as preliminary scaffolding unless and until later tasks add precise tests and
 experiment documentation.
+
+## Week 1 Start
+
+Use the templates in `docs/weekly/`, `docs/meetings/`, and `docs/reading/` for
+the first week. They are lightweight records for reading, definitions, blockers,
+commits, and meeting decisions.
 
 ## Reproducibility Notes
 
