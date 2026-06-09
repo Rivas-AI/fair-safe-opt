@@ -59,7 +59,7 @@ def load_adult(
     validation before treating this as a finalized experiment pipeline.
     """
     frame = fetch_openml(data_id=1590, as_frame=True).frame
-    frame = frame.replace("?", pd.NA).dropna().reset_index(drop=True)
+    frame = frame.dropna().reset_index(drop=True)
 
     target_col = "class"
     sensitive_col = "sex"
@@ -71,7 +71,7 @@ def load_adult(
     if not include_sensitive_feature:
         x_frame = x_frame.drop(columns=[sensitive_col])
 
-    categorical_cols = list(x_frame.select_dtypes(include=["category", "object"]).columns)
+    categorical_cols = list(x_frame.select_dtypes(include=["category", "object", "str"]).columns)
     continuous_cols = [col for col in x_frame.columns if col not in categorical_cols]
 
     x_train_val, x_test, y_train_val, y_test, a_train_val, a_test = train_test_split(
