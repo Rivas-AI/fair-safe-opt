@@ -57,3 +57,10 @@ def test_adult_data_shapes(monkeypatch) -> None:
     assert adult.a_train.shape[0] == adult.x_train.shape[0]
     assert adult.a_val.shape[0] == adult.x_val.shape[0]
     assert adult.a_test.shape[0] == adult.x_test.shape[0]
+    
+def test_continuous_mask(monkeypatch) -> None:
+    monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
+    adult = load_adult()
+
+    assert np.sum(adult.continuous_mask) == 6
+    assert np.sum(~adult.continuous_mask) == 20
