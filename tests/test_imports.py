@@ -11,21 +11,6 @@ def test_import_package() -> None:
 ADULT DATASET TESTING
 ========================================================================
 '''
-EXPECTED_FEATURES = {
-    "age",
-    "workclass",
-    "fnlwgt",
-    "education",
-    "education-num",
-    "marital-status",
-    "occupation",
-    "relationship",
-    "race",
-    "capital-gain",
-    "capital-loss",
-    "hours-per-week",
-    "native-country",
-}
 
 def make_fake_adult_frame() -> pd.DataFrame:
     return pd.DataFrame(
