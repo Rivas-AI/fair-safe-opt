@@ -62,5 +62,19 @@ def test_continuous_mask(monkeypatch) -> None:
     monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
     adult = load_adult()
 
-    assert np.sum(adult.continuous_mask) == 6
-    assert np.sum(~adult.continuous_mask) == 20
+    continuous_cols = adult.x_train[0][adult.continuous_mask]
+    categorical_cols = adult.x_train[0][~adult.continuous_mask]
+
+    assert type(continuous_cols) == np.ndarray
+    assert continuous_cols.shape[0] + categorical_cols.shape[0] == adult.x_train.shape[1]
+    assert set(continuous_cols) != {0, 1}
+    assert set(categorical_cols) == {0, 1}
+
+def test_standard_scaled_features(monkeypatch) -> None:
+    monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
+    adult = load_adult()
+
+    continuous_train = adult.x_train[:, adult.continuous_mask]
+
+    assert np.all(abs(continuous_train.mean(axis=0)) < 1e-6)
+    assert np.all(abs(1 - continuous_train.std(axis=0)) < 1e-6)
