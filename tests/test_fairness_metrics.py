@@ -17,6 +17,7 @@ def test_demographic_parity_difference_balanced() -> None:
 
     assert demographic_parity_difference(y_pred, sensitive) == 0.0
 
+
 def test_empty_group_handled() -> None:
     y_pred = torch.tensor([1, 0, 1, 0], dtype=torch.float32)
     sensitive = torch.tensor([0, 0, 0, 0], dtype=torch.float32)
@@ -27,6 +28,7 @@ def test_empty_group_handled() -> None:
 
     assert math.isnan(value)
     assert caught
+
 
 def test_demographic_parity_difference_nonzero() -> None:
     y_pred = torch.tensor([1, 1, 0, 0], dtype=torch.float32)

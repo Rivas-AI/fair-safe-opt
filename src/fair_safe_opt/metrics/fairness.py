@@ -22,7 +22,7 @@ def _rate(values: torch.Tensor, mask: torch.Tensor, name: str) -> torch.Tensor:
     """Compute the percentage of positive predictions within a group.
 
     Args:
-        values (torch.Tensor): Tensor of values per sample. 
+        values (torch.Tensor): Tensor of values per sample.
         mask (torch.Tensor): A boolean mask indicating which values are in the group.
         name (str): The name of the group (for warning messages).
 
@@ -40,11 +40,11 @@ def demographic_parity_difference(
     sensitive: torch.Tensor,
 ) -> float:
     """Hard-label demographic parity difference for two groups.
-    
+
     Args:
         y_pred: a tensor representing the predicted labels for all samples.
         sensitive: a tensor representing the value of the sensitive attribute for all samples.
-        
+
     Returns:
         float: The demographic parity difference between the two groups.
     """
@@ -54,7 +54,7 @@ def demographic_parity_difference(
 
     if torch.isnan(r0) or torch.isnan(r1):
         return torch.nan
-    
+
     return float(torch.abs(r0 - r1).item())
 
 
@@ -83,7 +83,7 @@ def demographic_parity_surrogate(
     probabilities: torch.Tensor,
     sensitive: torch.Tensor,
 ) -> torch.Tensor:
-    """Squared probability-mean demographic parity surrogate. Smooth function used for training. 
+    """Squared probability-mean demographic parity surrogate. Smooth function used for training.
 
     Definition:
         (E[p(x) | A = 0] - E[p(x) | A = 1]) ** 2
@@ -98,7 +98,7 @@ def equal_opportunity_surrogate(
     y_true: torch.Tensor,
     sensitive: torch.Tensor,
 ) -> torch.Tensor:
-    """Squared probability-mean equal opportunity surrogate. Smooth function used for training. 
+    """Squared probability-mean equal opportunity surrogate. Smooth function used for training.
 
     Definition:
         (E[p(x) | A = 0, Y = 1] - E[p(x) | A = 1, Y = 1]) ** 2
