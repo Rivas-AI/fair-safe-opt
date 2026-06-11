@@ -10,7 +10,7 @@ check-env:
 	python scripts/check_environment.py
 
 split-inspect:
-	python scripts/inspect_split.py
+	python scripts/inspect_adult.py
 
 logistic:
 	python scripts/run_logistic.py
