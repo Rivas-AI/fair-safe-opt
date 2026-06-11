@@ -20,20 +20,28 @@
 
 ## Code Or Test Changes
 
-- tests/test_imports.py:
-  - Added monkeypatch tests to check general shape, continuous mask functionality, and 
-  - correct sensitive/label attribute extraction.
+- ### tests/
+  - *test_imports.py*:
+    - Added monkeypatch tests to check general shape, continuous mask functionality, and 
+    - correct sensitive/label attribute extraction.
+  - *test_baseline_logistic.py*:
+    - Added logistic regression function testing using fake adult income dataset. 
+    - Checks shapes, predictions, training history output. 
 
-- scripts/inspect_adult.py:
-  - Added script to manually test whether the real dataset import works
-  - Added dummy classifiers and tested fairness metrics on them.
+- ### scripts/
+  - *inspect_adult.py*:
+    - Added script to manually test whether the real dataset import works
+    - Added dummy classifiers and tested fairness metrics on them.
+  - *run_baseline_logistic.py*: 
+    - Add script to train and evaluate baseline logistic regression model.
+    - Output confusion matrix, total accuracy, demographic parity difference, and equal opportunity difference.
 
-- tests/test_fairness_metrics.py: 
-  - Added small test which ended up being redundant. 
+- *Makefile*
+  - Added ```make inspect-adult``` and ```make baseline-logistic```
 
 # Adult data exploration
 
-from ```bash python scripts/inspect_adult.py ```
+from ```make inspect-adult```
 
 Num Features: 102
 
@@ -63,13 +71,30 @@ Fairness Metrics for All Ones Dummy on Test Dataset:
     - Demographic Parity Difference: 0.0
     - Equal Opportunity Difference: 0.0
     - Demographic Parity Surrogate: 0.0
-    - Equal Opportunity Surrogate: nan
+    - Equal Opportunity Surrogate: 0.0
 
 Fairness Metrics for Unfair Dummy on Test Dataset: 
     - Demographic Parity Difference: 1.0
     - Equal Opportunity Difference: 1.0
     - Demographic Parity Surrogate: 1.0
-    - Equal Opportunity Surrogate: nan
+    - Equal Opportunity Surrogate: 1.0
+
+## Logistic Regression Baseline
+
+from ```make baseline-logistic```
+
+Total Test Accuracy: 0.8484
+
+Confusion Matrix:
+[[6272  531]
+ [ 840 1402]]
+
+Demographic Parity Difference:
+0.18703436851501465
+
+Equal Opportunity Difference:
+0.003864884376525879
+
 
 ## Commit Hashes
 

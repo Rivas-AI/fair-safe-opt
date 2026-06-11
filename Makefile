@@ -12,5 +12,5 @@ check-env:
 inspect-adult:
 	python scripts/inspect_adult.py
 
-logistic:
-	python scripts/run_logistic.py
+baseline-logistic:
+	python scripts/run_baseline_logistic.py
