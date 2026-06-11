@@ -16,4 +16,4 @@ baseline-logistic:
 	python scripts/run_baseline_logistic.py
 
 baseline-mlp:
-	python scripts/run_baseline_mlp.py
+	python scripts/baseline_mlp.py
