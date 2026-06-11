@@ -3,27 +3,22 @@ from fair_safe_opt.training.erm import train_erm
 from fair_safe_opt.data.adult import load_adult, AdultSplit
 from test_imports import make_fake_adult_frame, fake_fetch_openml 
 import torch
+import pytest
 
 
 def test_leq_zero_input_dimension() -> None:
     '''Test that the model raises an error for non-positive input dimensions.'''
-    try:
-        model = LogisticRegression(input_dim=0)
-    except ValueError as e:
-        assert str(e) == "Input dimension must be positive."
-        
-    try:
-        model = LogisticRegression(input_dim=-5)
-    except ValueError as e:
-        assert str(e) == "Input dimension must be positive."
+    with pytest.raises(ValueError, match="Input dimension must be positive."):
+        LogisticRegression(input_dim=0)
+
+    with pytest.raises(ValueError, match="Input dimension must be positive."):
+        LogisticRegression(input_dim=-5)
 
 def test_malformed_input() -> None:
     '''Test that the model raises an error for malformed input.'''
     model = LogisticRegression(input_dim=5)
-    try:
+    with pytest.raises(ValueError, match="Input feature dimension mismatch."):
         model.predict(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
-    except ValueError as e:
-        assert str(e) == "Input feature dimension mismatch."
 
 def test_predictions(monkeypatch) -> None:
     '''Test that the model makes predictions with the correct shape and values.'''
@@ -42,4 +37,7 @@ def test_training(monkeypatch) -> None:
     
     model = LogisticRegression(input_dim=adult_split.x_train.shape[1])
     history = train_erm(model, torch.tensor(adult_split.x_train), torch.tensor(adult_split.y_train), epochs=2)
-    assert history is not None
+    assert len(history.losses) == 2
+    assert len(history.accuracies) == 2
+    assert all(torch.isfinite(torch.tensor(history.losses)))
+    assert all(0.0 <= acc <= 1.0 for acc in history.accuracies)
