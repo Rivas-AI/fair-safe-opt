@@ -9,7 +9,7 @@ smoke:
 check-env:
 	python scripts/check_environment.py
 
-split-inspect:
+inspect-adult:
 	python scripts/inspect_adult.py
 
 logistic:

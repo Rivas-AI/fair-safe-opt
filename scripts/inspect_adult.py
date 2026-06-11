@@ -90,7 +90,7 @@ def test_fairness_with_dummies(split):
     dpd_ones = demographic_parity_difference(ones_preds, a_test_tensor)
     eod_ones = equal_opportunity_difference(y_test_tensor, ones_preds, a_test_tensor)
     dpd_ones_surrogate = demographic_parity_surrogate(ones_preds, a_test_tensor)
-    eod_ones_surrogate = equal_opportunity_surrogate(y_test_tensor, unfair_preds, a_test_tensor)
+    eod_ones_surrogate = equal_opportunity_surrogate(ones_preds, y_test_tensor, a_test_tensor)
 
     print("Fairness Metrics for All Ones Dummy on Test Dataset: ")
     print(f"    - Demographic Parity Difference: {dpd_ones}")
@@ -102,7 +102,7 @@ def test_fairness_with_dummies(split):
     dpd_unfair = demographic_parity_difference(unfair_preds, a_test_tensor)
     eod_unfair = equal_opportunity_difference(y_test_tensor, unfair_preds, a_test_tensor)
     dpd_unfair_surrogate = demographic_parity_surrogate(unfair_preds, a_test_tensor)
-    eod_unfair_surrogate = equal_opportunity_surrogate(y_test_tensor, unfair_preds, a_test_tensor)
+    eod_unfair_surrogate = equal_opportunity_surrogate(unfair_preds, y_test_tensor, a_test_tensor)
 
     print("Fairness Metrics for Unfair Dummy on Test Dataset: ")
     print(f"    - Demographic Parity Difference: {dpd_unfair}")
