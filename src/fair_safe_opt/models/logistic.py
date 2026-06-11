@@ -11,3 +11,8 @@ class LogisticRegression(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x).squeeze(-1)
+    
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            logits = self.forward(x)
+            return (logits > 0).float()
