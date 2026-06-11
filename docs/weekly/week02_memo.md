@@ -35,9 +35,12 @@
   - *run_baseline_logistic.py*: 
     - Add script to train and evaluate baseline logistic regression model.
     - Output confusion matrix, total accuracy, demographic parity difference, and equal opportunity difference.
+  - *baseline_mlp.py*:
+    - Add a script to train and evaluate the baseline small mlp model.
+    - Output confusion matrix, total accuracy, demographic parity difference, and equal opportunity difference.
 
 - *Makefile*
-  - Added ```make inspect-adult``` and ```make baseline-logistic```
+  - Added ```make inspect-adult```, ```make baseline-logistic```, ```make baseline-mlp```
 
 # Adult data exploration
 
@@ -95,6 +98,20 @@ Demographic Parity Difference:
 Equal Opportunity Difference:
 0.003864884376525879
 
+
+## MLP Baseline 
+
+Total Test Accuracy: 0.8399
+
+Confusion Matrix:
+[[6288  515]
+ [ 933 1309]]
+
+Demographic Parity Difference:
+0.14557848870754242
+
+Equal Opportunity Difference:
+0.09484440088272095
 
 ## Commit Hashes
 
