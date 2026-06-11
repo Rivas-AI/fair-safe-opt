@@ -27,6 +27,9 @@
   - *test_baseline_logistic.py*:
     - Added logistic regression function testing using fake adult income dataset. 
     - Checks shapes, predictions, training history output. 
+  - *test_baseline_mlp.py*:
+    - Add mlp function testing using fake adult income dataset.
+    - check shapes, predictions, proper history format.
 
 - ### scripts/
   - *inspect_adult.py*:
