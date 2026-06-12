@@ -31,10 +31,10 @@ def print_metrics(preds: torch.tensor, y: torch.tensor, a: torch.tensor):
 def main():
     adult_split: AdultSplit = load_adult()
     model = SmallMLP(input_dim=adult_split.x_train.shape[1])
-    history: TrainingHistory = train_erm(model, torch.tensor(adult_split.x_train), torch.tensor(adult_split.y_train), epochs=100)
+    history: TrainingHistory = train_erm(model, torch.tensor(adult_split.x_train), torch.tensor(adult_split.y_train), epochs=10)
     plot_training_history(history)
 
-    predictions = model.predict(torch.tensor(adult_split.x_test))
+    predictions = model.predict_classes(torch.tensor(adult_split.x_test))
     ConfusionMatrixDisplay.from_predictions(adult_split.y_test, predictions)
     plt.show()
     

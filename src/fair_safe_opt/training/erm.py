@@ -29,7 +29,8 @@ def train_erm(
     losses: list[float] = []
     accuracies: list[float] = []
 
-    for _ in range(epochs):
+    for i in range(epochs):
+        print(f"Epoch {i + 1}/{epochs}")
         model.train()
         epoch_losses = []
         for xb, yb in loader:

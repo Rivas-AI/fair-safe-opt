@@ -23,7 +23,7 @@ class SmallMLP(nn.Module):
             raise ValueError("Input feature dimension mismatch.")
         return self.net(x).squeeze(-1)
 
-    def predict(self, x: torch.Tensor) -> torch.Tensor:
+    def predict_classes(self, x: torch.Tensor) -> torch.Tensor:
         self.eval()
         with torch.no_grad():
             logits = self.forward(x)
