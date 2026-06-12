@@ -18,7 +18,7 @@ def test_malformed_input() -> None:
     '''Test that the model raises an error for malformed input.'''
     model = LogisticRegression(input_dim=5)
     with pytest.raises(ValueError, match="Input feature dimension mismatch."):
-        model.predict(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
+        model.predict_classes(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
 
 def test_predictions(monkeypatch) -> None:
     '''Test that the model makes predictions with the correct shape and values.'''
@@ -26,7 +26,7 @@ def test_predictions(monkeypatch) -> None:
     adult_split: AdultSplit = load_adult()
     
     model = LogisticRegression(input_dim=adult_split.x_train.shape[1])
-    preds = model.predict(torch.tensor(adult_split.x_test))
+    preds = model.predict_classes(torch.tensor(adult_split.x_test))
     assert preds.shape == adult_split.y_test.shape
     assert set(preds.tolist()).issubset({0.,1.})
 
