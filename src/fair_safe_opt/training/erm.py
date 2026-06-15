@@ -44,7 +44,8 @@ def train_erm(
     epochs: int = 5,
     batch_size: int = 32,
     learning_rate: float = 1e-2,
-    patience: int = 5
+    patience: int = 5,
+    show_progress: bool = True
 ) -> TrainingHistory:
     device = set_device()
     model = model.to(device)
@@ -62,8 +63,16 @@ def train_erm(
     epochs_without_improvement = 0
     best_val_loss = float("inf") #initialize to infinity
 
-    for i in range(epochs):
-        print(f"Epoch {i + 1}/{epochs}")
+    # Code to show progress bar
+    if show_progress:
+        from tqdm.auto import tqdm
+
+        progress = tqdm(range(epochs), desc="ERM training", unit="epoch")
+    else:
+        progress = range(epochs)
+
+    # Epoch loop 
+    for _ in progress:
         model.train()
         epoch_losses = []
         for xb, yb in loader:
@@ -78,13 +87,26 @@ def train_erm(
             logits_val = model(x_val)
         
         # Append training metrics
-        train_losses.append(sum(epoch_losses) / len(epoch_losses))
-        train_accuracies.append(accuracy_from_logits(logits_train, y))
+        train_loss = sum(epoch_losses) / len(epoch_losses)
+        train_accuracy = accuracy_from_logits(logits_train, y)
+        train_losses.append(train_loss)
+        train_accuracies.append(train_accuracy)
     
         # Validation Block
         val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
+        val_accuracy = accuracy_from_logits(logits_val, y_val)
         val_losses.append(val_loss)
-        val_accuracies.append(accuracy_from_logits(logits_val, y_val))
+        val_accuracies.append(val_accuracy)
+        
+        # Update Progress Bar
+        if show_progress:
+            progress.set_postfix(
+                train_loss=f"{train_loss:.4f}",
+                train_acc=f"{train_accuracy:.3f}",
+                val_loss=f"{val_loss:.4f}",
+                val_acc=f"{val_accuracy:.3f}",
+            )
+        # Early Stopping
         if(val_loss < best_val_loss):
             epochs_without_improvement = 0
             best_val_loss = val_loss

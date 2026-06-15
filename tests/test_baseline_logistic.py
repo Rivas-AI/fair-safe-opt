@@ -60,6 +60,7 @@ def test_training(monkeypatch) -> None:
         torch.tensor(adult_split.x_val),
         torch.tensor(adult_split.y_val),
         epochs=2,
+        show_progress=False,
     )
     assert len(history.train_losses) == 2
     assert len(history.train_accuracies) == 2
@@ -87,6 +88,7 @@ def test_training_updates_weights(monkeypatch) -> None:
         torch.tensor(adult_split.x_val),
         torch.tensor(adult_split.y_val),
         epochs=2,
+        show_progress=False,
     )
 
     after = model.linear.weight.detach()
@@ -113,6 +115,7 @@ def test_training_stops_after_patience_without_improvement() -> None:
         batch_size=4,
         learning_rate=0.0,
         patience=1,
+        show_progress=False,
     )
 
     assert len(history.train_losses) == 2

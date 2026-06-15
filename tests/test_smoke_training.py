@@ -10,7 +10,17 @@ def test_logistic_smoke_training_runs() -> None:
     dataset = make_synthetic_tabular(n_samples=64, seed=11)
     model = LogisticRegression(dataset.x.shape[1])
 
-    history = train_erm(model, dataset.x, dataset.y, dataset.x_val, dataset.y_val, epochs=2, batch_size=16, learning_rate=0.05)
+    history = train_erm(
+        model,
+        dataset.x,
+        dataset.y,
+        dataset.x_val,
+        dataset.y_val,
+        epochs=2,
+        batch_size=16,
+        learning_rate=0.05,
+        show_progress=False,
+    )
     metrics = evaluate_binary_classifier(model, dataset.x, dataset.y, dataset.sensitive_train)
 
     assert len(history.train_losses) == 2
