@@ -1,7 +1,7 @@
 from fair_safe_opt.models.logistic import LogisticRegression
 from fair_safe_opt.training.erm import train_erm
 from fair_safe_opt.data.adult import load_adult, AdultSplit
-from test_imports import make_fake_adult_frame, fake_fetch_openml 
+from test_imports import fake_fetch_openml 
 import torch
 import pytest
 
@@ -36,8 +36,8 @@ def test_training(monkeypatch) -> None:
     adult_split: AdultSplit = load_adult()
     
     model = LogisticRegression(input_dim=adult_split.x_train.shape[1])
-    history = train_erm(model, torch.tensor(adult_split.x_train), torch.tensor(adult_split.y_train), epochs=2)
-    assert len(history.losses) == 2
-    assert len(history.accuracies) == 2
-    assert all(torch.isfinite(torch.tensor(history.losses)))
-    assert all(0.0 <= acc <= 1.0 for acc in history.accuracies)
+    history = train_erm(model, torch.tensor(adult_split.x_train), torch.tensor(adult_split.y_train), torch.tensor(adult_split.x_val), torch.tensor(adult_split.y_val), epochs=2)
+    assert len(history.train_losses) == 2
+    assert len(history.train_accuracies) == 2
+    assert all(torch.isfinite(torch.tensor(history.train_losses)))
+    assert all(0.0 <= acc <= 1.0 for acc in history.train_accuracies)

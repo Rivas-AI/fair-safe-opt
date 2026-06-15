@@ -10,7 +10,10 @@ import torch
 class TabularDataset:
     x: torch.Tensor
     y: torch.Tensor
-    sensitive: torch.Tensor
+    x_val: torch.Tensor
+    y_val: torch.Tensor
+    sensitive_train: torch.Tensor
+    sensitive_val: torch.Tensor
     continuous_mask: torch.Tensor
     feature_min: torch.Tensor
     feature_max: torch.Tensor
@@ -34,10 +37,14 @@ def make_synthetic_tabular(
     continuous_mask = np.array([True] * n_continuous + [False] * n_categorical)
     feature_min = x.copy().min(axis=0).astype("float32")
     feature_max = x.copy().max(axis=0).astype("float32")
+    split_idx = int(0.8 * n_samples)
     return TabularDataset(
-        x=torch.tensor(x, dtype=torch.float32),
-        y=torch.tensor(y, dtype=torch.float32),
-        sensitive=torch.tensor(sensitive, dtype=torch.float32),
+        x=torch.tensor(x[:split_idx], dtype=torch.float32),
+        y=torch.tensor(y[:split_idx], dtype=torch.float32),
+        x_val=torch.tensor(x[split_idx:], dtype=torch.float32),
+        y_val=torch.tensor(y[split_idx:], dtype=torch.float32),
+        sensitive_train=torch.tensor(sensitive[:split_idx], dtype=torch.float32),
+        sensitive_val=torch.tensor(sensitive[split_idx:], dtype=torch.float32),
         continuous_mask=torch.tensor(continuous_mask, dtype=torch.bool),
         feature_min=torch.tensor(feature_min, dtype=torch.float32),
         feature_max=torch.tensor(feature_max, dtype=torch.float32),
