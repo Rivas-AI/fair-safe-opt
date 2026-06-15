@@ -107,3 +107,19 @@ def equal_opportunity_surrogate(
     r0 = _rate(probabilities, positives & _as_bool_group(sensitive, 0), "positive group 0")
     r1 = _rate(probabilities, positives & _as_bool_group(sensitive, 1), "positive group 1")
     return (r0 - r1).pow(2)
+
+def accuracy_by_group(
+    predictions: torch.Tensor,
+    y_true: torch.Tensor,
+    sensitive: torch.Tensor,
+) -> dict[int, float]:
+    """Accuracy separately for sensitive groups 0 and 1."""
+    correct = predictions.to(torch.long) == y_true.to(torch.long)
+
+    acc0 = _rate(correct.float(), _as_bool_group(sensitive, 0), "group 0 accuracy")
+    acc1 = _rate(correct.float(), _as_bool_group(sensitive, 1), "group 1 accuracy")
+
+    return {
+        0: float(acc0.item()),
+        1: float(acc1.item()),
+    }

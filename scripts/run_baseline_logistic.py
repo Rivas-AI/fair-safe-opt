@@ -2,7 +2,7 @@ from fair_safe_opt.models.logistic import LogisticRegression
 from fair_safe_opt.data.adult import load_adult, AdultSplit
 from fair_safe_opt.training.erm import train_erm, TrainingHistory
 from fair_safe_opt.metrics.classification import accuracy_from_logits
-from fair_safe_opt.metrics.fairness import demographic_parity_difference, equal_opportunity_difference
+from fair_safe_opt.metrics.fairness import demographic_parity_difference, equal_opportunity_difference, accuracy_by_group
 import torch
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
@@ -34,8 +34,12 @@ def plot_accuracies(history: TrainingHistory):
 
 def print_metrics(preds: torch.tensor, y: torch.tensor, a: torch.tensor):
     accuracy_total = (preds == y).float().mean().item()
+    accuracy_by_group_dict = accuracy_by_group(preds, y, a)
+    
     print(f"\nTotal Test Accuracy: {accuracy_total:.4f}\n")
-
+    print(f"Group 0 Test Accuracy (Men): {accuracy_by_group_dict[0]:.4f}\n")
+    print(f"Group 1 Test Accuracy (Women): {accuracy_by_group_dict[1]:.4f}\n")
+    
     print(f"Confusion Matrix:")
     print(confusion_matrix(y, preds))
 
