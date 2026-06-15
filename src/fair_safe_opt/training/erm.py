@@ -5,14 +5,17 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
+import copy
 
 from fair_safe_opt.metrics.classification import accuracy_from_logits
 
 
 @dataclass(frozen=True)
 class TrainingHistory:
-    losses: list[float]
-    accuracies: list[float]
+    train_losses: list[float]
+    train_accuracies: list[float]
+    val_losses: list[float]
+    val_accuracies: list[float]
 
 
 def set_device():
@@ -35,24 +38,32 @@ def train_erm(
     model: nn.Module,
     x: torch.Tensor,
     y: torch.Tensor,
+    x_val: torch.Tensor,
+    y_val: torch.Tensor,
     *,
     epochs: int = 5,
     batch_size: int = 32,
     learning_rate: float = 1e-2,
+    patience: int = 5
 ) -> TrainingHistory:
     device = set_device()
     model = model.to(device)
     x = x.to(device)
     y = y.to(device)
+    x_val = x_val.to(device)
+    y_val = y_val.to(device)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x, y), batch_size=batch_size, shuffle=True)
-    losses: list[float] = []
-    accuracies: list[float] = []
+    train_losses: list[float] = []
+    train_accuracies: list[float] = []
+    val_losses: list[float] = []
+    val_accuracies: list[float] = []
+    epochs_without_improvement = 0
+    best_val_loss = float("inf") #initialize to infinity
 
     for i in range(epochs):
         print(f"Epoch {i + 1}/{epochs}")
-        model = model.to(device)
         model.train()
         epoch_losses = []
         for xb, yb in loader:
@@ -63,9 +74,27 @@ def train_erm(
             epoch_losses.append(float(loss.item()))
         model.eval()
         with torch.no_grad():
-            logits = model(x)
-        losses.append(sum(epoch_losses) / len(epoch_losses))
-        accuracies.append(accuracy_from_logits(logits, y))
-
+            logits_train = model(x)
+            logits_val = model(x_val)
+        
+        # Append training metrics
+        train_losses.append(sum(epoch_losses) / len(epoch_losses))
+        train_accuracies.append(accuracy_from_logits(logits_train, y))
+    
+        # Validation Block
+        val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
+        val_losses.append(val_loss)
+        val_accuracies.append(accuracy_from_logits(logits_val, y_val))
+        if(val_loss < best_val_loss):
+            epochs_without_improvement = 0
+            best_val_loss = val_loss
+            best_state = copy.deepcopy(model.state_dict())
+        else: 
+            epochs_without_improvement += 1
+            if(epochs_without_improvement >= patience):
+                break
+        
+    model.load_state_dict(best_state)
     model.to("cpu")
-    return TrainingHistory(losses=losses, accuracies=accuracies)
+    
+    return TrainingHistory(train_losses=train_losses, train_accuracies=train_accuracies, val_losses=val_losses, val_accuracies=val_accuracies)
