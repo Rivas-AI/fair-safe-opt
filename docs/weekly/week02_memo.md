@@ -14,10 +14,6 @@
 
 - Hardt et al. on Fairness
 
-## Questions And Blockers
-
-- 
-
 ## Code Or Test Changes
 
 - ### tests/
@@ -118,6 +114,30 @@ Equal Opportunity Difference:
 
 ## Commit Hashes
 
-
+- ef92454 Added cuda and mps functionalityfor long-term scalability
+- a38e506 Updated tests
+- 3540366 Updated prediction function name for clarity.
+- d8b109c Updated week 2 memo
+- 76854de Updated week 2 memo
+- 30c4439 Added minimally tested baseline mlp code.
+- 2922c25 Fixed make
+- de48c04 Added error throwing for malformed input
+- 6c51562 Added make baseline-mlp
+- bc8b7f1 Updated testing. Added baseline mlp testing.
+- 72a9d35 Updated week02mmemo with day's work and updated function names to enhance clarity.
+- fb2aa1b Updated makefile for clarity. Fixed bug in inspect_adult causing nan behavior.
+- ed04a8c Add script to run a simple logistic regression and print metrics.
+- 10c1f2d added malformed input error throwing
+- 0371842 Added test suite for logistic regression model.
+- f4f0742 Corrected split-inspect filepath
+- 0c246a3 Add logistic and split-inspect makes
+- a0429da Added predict function
 
 ## Next Actions
+
+- Add validation loop and early stopping.
+- Add random seed
+- Add better logging and checkpoints
+- output per-group accuracy
+- transfer model analysis into a library
+- separate loss/accuracy graphs
