@@ -5,23 +5,25 @@ import pytest
 from test_imports import fake_fetch_openml
 from fair_safe_opt.data.adult import load_adult, AdultSplit
 
+
 def test_leq_zero_input_dimension() -> None:
-    '''Test that the model raises an error for non-positive input dimensions.'''
+    """Test that the model raises an error for non-positive input dimensions."""
     with pytest.raises(ValueError, match="Input dimension must be positive."):
         SmallMLP(input_dim=0)
 
     with pytest.raises(ValueError, match="Input dimension must be positive."):
         SmallMLP(input_dim=-5)
 
+
 def test_malformed_input() -> None:
-    '''Test that the model raises an error for malformed input.'''
+    """Test that the model raises an error for malformed input."""
     model = SmallMLP(input_dim=5)
     with pytest.raises(ValueError, match="Input feature dimension mismatch."):
         model.predict_classes(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
 
 
 def test_forward_logits() -> None:
-    '''Test that forward returns one logit per row.'''
+    """Test that forward returns one logit per row."""
     model = SmallMLP(input_dim=2, hidden_dim=2)
 
     with torch.no_grad():
@@ -39,20 +41,21 @@ def test_forward_logits() -> None:
 
 
 def test_predictions(monkeypatch) -> None:
-    '''Test that the model makes predictions with the correct shape and values.'''
+    """Test that the model makes predictions with the correct shape and values."""
     monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
     adult_split: AdultSplit = load_adult()
-    
+
     model = SmallMLP(input_dim=adult_split.x_train.shape[1])
     preds = model.predict_classes(torch.tensor(adult_split.x_test))
     assert preds.shape == adult_split.y_test.shape
-    assert set(preds.tolist()).issubset({0.,1.})
+    assert set(preds.tolist()).issubset({0.0, 1.0})
+
 
 def test_training(monkeypatch) -> None:
-    '''Test that the model trains correctly.'''
+    """Test that the model trains correctly."""
     monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
     adult_split: AdultSplit = load_adult()
-    
+
     model = SmallMLP(input_dim=adult_split.x_train.shape[1])
     history = train_erm(
         model,
@@ -74,7 +77,7 @@ def test_training(monkeypatch) -> None:
 
 
 def test_training_updates_weights(monkeypatch) -> None:
-    '''Test that training updates model parameters.'''
+    """Test that training updates model parameters."""
     monkeypatch.setattr("fair_safe_opt.data.adult.fetch_openml", fake_fetch_openml)
     adult_split: AdultSplit = load_adult()
 
@@ -98,7 +101,7 @@ def test_training_updates_weights(monkeypatch) -> None:
 
 
 def test_training_stops_after_patience_without_improvement() -> None:
-    '''Test that training stops when validation loss does not improve.'''
+    """Test that training stops when validation loss does not improve."""
     model = SmallMLP(input_dim=2, hidden_dim=2)
 
     x = torch.tensor([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
@@ -124,7 +127,7 @@ def test_training_stops_after_patience_without_improvement() -> None:
 
 
 def test_prediction_threshold() -> None:
-    '''Test prediction threshold behavior.'''
+    """Test prediction threshold behavior."""
     model = SmallMLP(input_dim=1, hidden_dim=1)
 
     with torch.no_grad():

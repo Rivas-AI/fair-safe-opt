@@ -19,21 +19,22 @@ class TrainingHistory:
 
 
 def set_device():
-    '''
-    Sets device used for training. Heirarchy goes CUDA, MPS, then CPU if none are available. 
+    """
+    Sets device used for training. Heirarchy goes CUDA, MPS, then CPU if none are available.
     returns:
     - (torch.device): device to be used.
-    '''
+    """
     if torch.cuda.is_available():
         print("Using CUDA")
-        return(torch.device("cuda"))
+        return torch.device("cuda")
     elif torch.backends.mps.is_available():
         print("Using MPS")
-        return(torch.device("mps"))
+        return torch.device("mps")
     else:
         print("Using CPU")
-        return(torch.device("cpu"))
-    
+        return torch.device("cpu")
+
+
 def train_erm(
     model: nn.Module,
     x: torch.Tensor,
@@ -45,7 +46,7 @@ def train_erm(
     batch_size: int = 32,
     learning_rate: float = 1e-2,
     patience: int = 5,
-    show_progress: bool = True
+    show_progress: bool = True,
 ) -> TrainingHistory:
     device = set_device()
     model = model.to(device)
@@ -53,7 +54,7 @@ def train_erm(
     y = y.to(device)
     x_val = x_val.to(device)
     y_val = y_val.to(device)
-    
+
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x, y), batch_size=batch_size, shuffle=True)
     train_losses: list[float] = []
@@ -61,7 +62,7 @@ def train_erm(
     val_losses: list[float] = []
     val_accuracies: list[float] = []
     epochs_without_improvement = 0
-    best_val_loss = float("inf") #initialize to infinity
+    best_val_loss = float("inf")  # initialize to infinity
 
     # Code to show progress bar
     if show_progress:
@@ -71,7 +72,7 @@ def train_erm(
     else:
         progress = range(epochs)
 
-    # Epoch loop 
+    # Epoch loop
     for _ in progress:
         model.train()
         epoch_losses = []
@@ -85,19 +86,19 @@ def train_erm(
         with torch.no_grad():
             logits_train = model(x)
             logits_val = model(x_val)
-        
+
         # Append training metrics
         train_loss = sum(epoch_losses) / len(epoch_losses)
         train_accuracy = accuracy_from_logits(logits_train, y)
         train_losses.append(train_loss)
         train_accuracies.append(train_accuracy)
-    
+
         # Validation Block
         val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
         val_accuracy = accuracy_from_logits(logits_val, y_val)
         val_losses.append(val_loss)
         val_accuracies.append(val_accuracy)
-        
+
         # Update Progress Bar
         if show_progress:
             progress.set_postfix(
@@ -107,16 +108,21 @@ def train_erm(
                 val_acc=f"{val_accuracy:.3f}",
             )
         # Early Stopping
-        if(val_loss < best_val_loss):
+        if val_loss < best_val_loss:
             epochs_without_improvement = 0
             best_val_loss = val_loss
             best_state = copy.deepcopy(model.state_dict())
-        else: 
+        else:
             epochs_without_improvement += 1
-            if(epochs_without_improvement >= patience):
+            if epochs_without_improvement >= patience:
                 break
-        
+
     model.load_state_dict(best_state)
     model.to("cpu")
-    
-    return TrainingHistory(train_losses=train_losses, train_accuracies=train_accuracies, val_losses=val_losses, val_accuracies=val_accuracies)
+
+    return TrainingHistory(
+        train_losses=train_losses,
+        train_accuracies=train_accuracies,
+        val_losses=val_losses,
+        val_accuracies=val_accuracies,
+    )

@@ -137,7 +137,9 @@ def make_fake_adult_frame() -> pd.DataFrame:
     )
 
 
-def fake_fetch_openml(data_id, as_frame) -> Bunch: # Args are required even if not used, since real function takes them.
+def fake_fetch_openml(
+    data_id, as_frame
+) -> Bunch:  # Args are required even if not used, since real function takes them.
     return Bunch(frame=make_fake_adult_frame())
 
 

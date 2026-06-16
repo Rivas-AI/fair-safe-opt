@@ -108,6 +108,7 @@ def equal_opportunity_surrogate(
     r1 = _rate(probabilities, positives & _as_bool_group(sensitive, 1), "positive group 1")
     return (r0 - r1).pow(2)
 
+
 def accuracy_by_group(
     predictions: torch.Tensor,
     y_true: torch.Tensor,
