@@ -12,8 +12,5 @@ check-env:
 inspect-adult:
 	python scripts/inspect_adult.py
 
-baseline-logistic:
-	python scripts/run_baseline_logistic.py
-
-baseline-mlp:
-	python scripts/baseline_mlp.py
+report:
+	python scripts/train_and_generate_report.py

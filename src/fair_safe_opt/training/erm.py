@@ -6,6 +6,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import copy
+from pathlib import Path
 
 from fair_safe_opt.metrics.classification import accuracy_from_logits
 
@@ -41,6 +42,7 @@ def train_erm(
     y: torch.Tensor,
     x_val: torch.Tensor,
     y_val: torch.Tensor,
+    save_dir: Path | None = None,
     *,
     epochs: int = 5,
     batch_size: int = 32,
@@ -48,6 +50,7 @@ def train_erm(
     patience: int = 5,
     show_progress: bool = True,
 ) -> TrainingHistory:
+    # Set device
     device = set_device()
     model = model.to(device)
     x = x.to(device)
@@ -55,6 +58,7 @@ def train_erm(
     x_val = x_val.to(device)
     y_val = y_val.to(device)
 
+    # Define training variables
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x, y), batch_size=batch_size, shuffle=True)
     train_losses: list[float] = []
@@ -93,7 +97,7 @@ def train_erm(
         train_losses.append(train_loss)
         train_accuracies.append(train_accuracy)
 
-        # Validation Block
+        # Calculate Validation loss & acc
         val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
         val_accuracy = accuracy_from_logits(logits_val, y_val)
         val_losses.append(val_loss)
@@ -107,11 +111,14 @@ def train_erm(
                 val_loss=f"{val_loss:.4f}",
                 val_acc=f"{val_accuracy:.3f}",
             )
+
         # Early Stopping
         if val_loss < best_val_loss:
             epochs_without_improvement = 0
             best_val_loss = val_loss
             best_state = copy.deepcopy(model.state_dict())
+            if save_dir is not None:
+                torch.save(best_state, save_dir / "best_model.pt")
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= patience:

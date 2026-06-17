@@ -1,0 +1,56 @@
+import torch
+
+from fair_safe_opt.utils.directories import create_report_dir
+from fair_safe_opt.utils.seeds import set_seed
+
+from fair_safe_opt.data.adult import load_adult
+
+from fair_safe_opt.models.logistic import LogisticRegression
+from fair_safe_opt.models.mlp import SmallMLP
+
+from fair_safe_opt.training.erm import train_erm, TrainingHistory
+
+from fair_safe_opt.evaluation.evaluate import evaluate_model, Evaluation
+from fair_safe_opt.reporting.report import create_report
+
+ARCHITECTURE = "small_mlp"  # Valid: {'logistic', 'small_mlp'}
+METHOD = "erm"  # Valid: {'erm'}
+SEED = 0
+EPOCHS = 10
+
+
+def main():
+    set_seed(SEED)
+    out_dir = create_report_dir(ARCHITECTURE, METHOD, SEED)
+
+    split = load_adult()
+
+    # Define model architecture
+    if ARCHITECTURE == "logistic":
+        model = LogisticRegression(split.x_train.shape[1])
+    elif ARCHITECTURE == "small_mlp":
+        model = SmallMLP(split.x_train.shape[1])
+    else:
+        raise ValueError("architecture not in {'logistic', 'small_mlp'}")
+
+    # Train the model using the specified method
+    if METHOD == "erm":
+        history: TrainingHistory = train_erm(
+            model,
+            torch.tensor(split.x_train),
+            torch.tensor(split.y_train),
+            torch.tensor(split.x_val),
+            torch.tensor(split.y_val),
+            out_dir,
+            epochs=EPOCHS,
+        )
+    else:
+        raise ValueError("method not in {'erm'}")
+
+    eval: Evaluation = evaluate_model(model, split, history, out_dir)
+
+    create_report(ARCHITECTURE, METHOD, SEED, eval, out_dir)
+
+
+if __name__ == "__main__":
+    main()
