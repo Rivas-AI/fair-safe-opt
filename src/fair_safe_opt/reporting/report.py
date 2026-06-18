@@ -3,7 +3,16 @@ from pathlib import Path
 
 
 def create_report(
-    architecture: str, method: str, seed: int, epochs: int, patience: int, eval: Evaluation, out_dir: Path
+    architecture: str, 
+    method: str, 
+    seed: int, 
+    epochs: int, 
+    patience: int, 
+    hidden_dim: int,
+    dropout: float, 
+    learning_rate: float,
+    eval: Evaluation, 
+    out_dir: Path
 ) -> None:
     output_file = out_dir / "report.md"
     with open(output_file, "w") as f:
@@ -16,6 +25,9 @@ def create_report(
         print(f" - Method: {method}", file=f)
         print(f" - Epochs: {epochs}", file=f)
         print(f" - Patience: {patience}", file=f)
+        print(f" - Hidden Dimension: {hidden_dim}", file=f)
+        print(f" - Dropout: {dropout}", file=f)
+        print(f" - Learning Rate: {learning_rate}", file=f)
         print("", file=f)
 
         print("## Training History", file=f)
