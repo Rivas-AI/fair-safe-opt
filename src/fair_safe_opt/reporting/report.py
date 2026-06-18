@@ -57,6 +57,7 @@ def create_report(
         print("|----------|----------|", file=f)
         print(f"| Accuracy | {eval.group0_acc:.4f} |", file=f)
         print(f"| ROC AUC | {eval.group0_auc:.4f}", file=f)
+        print(f"| Advantaged TPR | {eval.group0_advantaged_TPR:.4f}", file=f)
         print("", file=f)
 
         print("## Confusion Matrix & ROC Curve", file=f)
@@ -69,6 +70,8 @@ def create_report(
         print("|----------|----------|", file=f)
         print(f"| Accuracy | {eval.group1_acc:.4f} |", file=f)
         print(f"| ROC AUC | {eval.group1_auc:.4f}", file=f)
+        print(f"| Advantaged TPR | {eval.group1_advantaged_TPR:.4f}", file=f)
+
         print("", file=f)
 
         print("## Confusion Matrix & ROC Curve", file=f)
