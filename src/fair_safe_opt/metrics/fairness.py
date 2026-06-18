@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from sklearn.metrics import roc_auc_score
 
 import torch
 
@@ -123,4 +124,36 @@ def accuracy_by_group(
     return {
         0: float(acc0.item()),
         1: float(acc1.item()),
+    }
+    
+def auc_by_group(
+    probs: torch.Tensor,
+    y_true: torch.Tensor,
+    sensitive: torch.Tensor,
+) -> dict[int, float]:
+    """AUC separately for sensitive groups 0 and 1."""
+    result = {}
+    for group in (0, 1):
+        mask = _as_bool_group(sensitive, group)
+        if mask.sum().item() == 0:
+            warnings.warn(f"No samples for group {group}; returning nan.", RuntimeWarning)
+            result[group] = float("nan")
+        else:
+            result[group] = float(roc_auc_score(y_true[mask].numpy(), probs[mask].numpy()))
+    return result
+    
+def TPR_by_group(
+    predictions: torch.Tensor,
+    y_true: torch.Tensor,
+    sensitive: torch.Tensor,
+) -> dict[int, float]:
+    """True positive rate separately for sensitive groups 0 and 1."""
+    positives = y_true.to(torch.long) == 1
+
+    tpr0 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 0), "positive group 0")
+    tpr1 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 1), "positive group 1")
+
+    return {
+        0: float(tpr0.item()),
+        1: float(tpr1.item()),
     }
