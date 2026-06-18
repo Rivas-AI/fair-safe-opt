@@ -13,9 +13,9 @@ from fair_safe_opt.training.erm import train_erm, TrainingHistory
 from fair_safe_opt.evaluation.evaluate import evaluate_model, Evaluation
 from fair_safe_opt.reporting.report import create_report
 
-ARCHITECTURE = "small_mlp"  # Valid: {'logistic', 'small_mlp', 'optimized_mlp'}
+ARCHITECTURES = ["logistic", "small_mlp"]  # Valid: {'logistic', 'small_mlp', 'optimized_mlp'}
 METHOD = "erm"  # Valid: {'erm'}
-SEED = 0
+SEEDS = [0, 1, 2]
 
 EPOCHS = 10
 PATIENCE = 5
@@ -24,11 +24,11 @@ DROPOUT = 0.0
 LEARNING_RATE = 1e-4
 
 
-def main():
+def run(ARCHITECTURE, SEED):
     set_seed(SEED)
     out_dir = create_report_dir(ARCHITECTURE, METHOD, SEED)
 
-    split = load_adult()
+    split = load_adult(random_state=SEED)
 
     # Define model architecture
     if ARCHITECTURE == "logistic":
@@ -59,6 +59,13 @@ def main():
     eval: Evaluation = evaluate_model(model, split, history, out_dir)
 
     create_report(ARCHITECTURE, METHOD, SEED, EPOCHS, PATIENCE, HIDDEN_DIM, DROPOUT, LEARNING_RATE, eval, out_dir)
+
+
+def main():
+    for architecture in ARCHITECTURES:
+        for seed in SEEDS:
+            print(f"\n=== {architecture} | seed {seed} ===")
+            run(architecture, seed)
 
 
 if __name__ == "__main__":
