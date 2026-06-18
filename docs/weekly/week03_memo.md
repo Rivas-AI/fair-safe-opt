@@ -3,14 +3,12 @@
 ## Dates
 
 - Start: Monday, 6/15
-- End: Friday, 6/20
+- End: Friday, 6/19
 
 ## Hours Completed
 
 - Planned: 40
 - Completed: 
-
-## Assigned Readings
 
 ## Code Or Test Changes
 
@@ -19,8 +17,8 @@
     - Updated tests to work with new validation set code.
 
 - ### scripts/
-  - *run_baseline_logistic.py & baseline_mlp.py*: 
-    - Transfer evaluation code to library usage
+  - *train_and_write_report.py*: 
+    - Replaces the two baseline scripts. Alter parameters such as architecture, seed, training method, and then run with ```make report```. Will train a model of the specified architecture and generate a report with graphs and metrics in ```results/YYYY.MM.DD/{architecture}_seed{seed}_{method}_{HHMM}```
 
 - ### src/fair_safe_opt
   - **training/**
@@ -28,10 +26,16 @@
       -  Added validation loop and early stopping to training.
   - **evaluation/**
     - *evaluate.py*
-      - Moved set_seed, plot training history, and print metrics functions here for reproducibility. 
+      - Created a new datatype ```Evaluation``` to be returned, which includes:
+        - Names of per-group and combined ROC and confusion matrix plots for easy retrieval.
+        - Demographic Parity and Equal Opportunity differences.
+        - Per-group and combined accuracy and AUC curve scores. 
   - **metrics/**
     - *fairness.py*
       - Added per-group accuracy function. 
+  - **reporting/**
+    - *report.py*
+      - Created a function which takes in an ```Evaluation``` object and outputs a full run report .md file.
 
 ## Logistic Regression Baseline
 
@@ -66,30 +70,25 @@ Equal Opportunity Difference:
 
 ## Commit Hashes
 
-- ef92454 Added cuda and mps functionalityfor long-term scalability
+- 92ff066 Added epochs and patience to reporting
+- **f3342a5 Updated model eval pipeline with heavy restructuring to disentangle**
+- e5c1c08 Got evaluation code working and report format correct
+- 35b59f4 Updated seed code
+- f0ad914 Added artifact output to evaluation pipeline
+- 84dd431 Ruff check and format
+- 5a5afd2 Ruff check and format
+- acfe93d Begin week 3 memo
+- 142d358 Added tqdm progress bar to training
+- 453ca25 Added more robust testing and implemented libraries into MLP script
+- bb6ea34 Transferred evaluation code to a reusable library and updated script
+- 8459107 Added per-group accuracy and output it in the model analysis
+- 6f1deaa Finished week 2 memo
+- dba822b Updated testing to match new validation-inclusive Adult split
+- **77c7fe6 Added validation and early stopping**
+- ef92454 Added CUDA and MPS functionality for long-term scalability
 - a38e506 Updated tests
-- 3540366 Updated prediction function name for clarity.
+- 3540366 Updated prediction function name for clarity
 - d8b109c Updated week 2 memo
 - 76854de Updated week 2 memo
-- 30c4439 Added minimally tested baseline mlp code.
-- 2922c25 Fixed make
-- de48c04 Added error throwing for malformed input
-- 6c51562 Added make baseline-mlp
-- bc8b7f1 Updated testing. Added baseline mlp testing.
-- 72a9d35 Updated week02mmemo with day's work and updated function names to enhance clarity.
-- fb2aa1b Updated makefile for clarity. Fixed bug in inspect_adult causing nan behavior.
-- ed04a8c Add script to run a simple logistic regression and print metrics.
-- 10c1f2d added malformed input error throwing
-- 0371842 Added test suite for logistic regression model.
-- f4f0742 Corrected split-inspect filepath
-- 0c246a3 Add logistic and split-inspect makes
-- a0429da Added predict function
 
 ## Next Actions
-
-- Add validation loop and early stopping.
-- Add random seed
-- Add better logging and checkpoints
-- output per-group accuracy
-- transfer model analysis into a library
-- separate loss/accuracy graphs
