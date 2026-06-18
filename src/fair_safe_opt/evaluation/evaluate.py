@@ -166,8 +166,8 @@ def evaluate_model(
     )
 
     # Metrics for group 1
-    group1_accuracy = per_group_acc[0]
-    group1_auc_score = per_group_auc[0]
+    group1_accuracy = per_group_acc[1]
+    group1_auc_score = per_group_auc[1]
     group1_tpr = per_group_tpr[1]
     group1_roc_conf_name = plot_roc_confusion(
         group1_preds, group1_probs, group1_labels, out_dir, "group1"
