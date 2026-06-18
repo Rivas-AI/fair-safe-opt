@@ -28,6 +28,9 @@ from fair_safe_opt.metrics.classification import accuracy_from_logits
 from fair_safe_opt.metrics.fairness import (
     demographic_parity_difference,
     equal_opportunity_difference,
+    accuracy_by_group,
+    auc_by_group,
+    TPR_by_group
 )
 
 
@@ -58,6 +61,9 @@ class Evaluation:
     total_auc: float
     group0_auc: float
     group1_auc: float
+    
+    group0_advantaged_TPR: float
+    group1_advantaged_TPR: float
 
     dem_parity_diff: float
     equal_opp_diff: float
@@ -138,6 +144,10 @@ def evaluate_model(
     equal_opp = equal_opportunity_difference(true_labels, preds, sensitive_col)
     total_roc_conf_name = plot_roc_confusion(preds, probs, true_labels, out_dir, "combined")
 
+    per_group_acc = accuracy_by_group(preds, true_labels, sensitive_col)
+    per_group_auc = auc_by_group(probs, true_labels, sensitive_col)
+    per_group_tpr = TPR_by_group(preds, true_labels, sensitive_col)
+    
     # Create boolean mask
     group0_mask = sensitive_col == 0
     group0_preds = preds[group0_mask]
@@ -148,15 +158,17 @@ def evaluate_model(
     group1_labels = true_labels[~group0_mask]
 
     # Metrics for group 0
-    group0_accuracy = (group0_preds == group0_labels).float().mean().item()
-    group0_auc_score = roc_auc_score(group0_labels.numpy(), group0_probs.numpy())
+    group0_accuracy = per_group_acc[0]
+    group0_auc_score = per_group_auc[0]
+    group0_tpr = per_group_tpr[0]
     group0_roc_conf_name = plot_roc_confusion(
         group0_preds, group0_probs, group0_labels, out_dir, "group0"
     )
 
     # Metrics for group 1
-    group1_accuracy = (group1_preds == group1_labels).float().mean().item()
-    group1_auc_score = roc_auc_score(group1_labels.numpy(), group1_probs.numpy())
+    group1_accuracy = per_group_acc[0]
+    group1_auc_score = per_group_auc[0]
+    group1_tpr = per_group_tpr[1]
     group1_roc_conf_name = plot_roc_confusion(
         group1_preds, group1_probs, group1_labels, out_dir, "group1"
     )
@@ -168,6 +180,8 @@ def evaluate_model(
         total_auc=total_auc_score,
         group0_auc=group0_auc_score,
         group1_auc=group1_auc_score,
+        group0_advantaged_TPR = group0_tpr,
+        group1_advantaged_TPR = group1_tpr,
         dem_parity_diff=demographic_par,
         equal_opp_diff=equal_opp,
         hist_plot_name=history_name,
