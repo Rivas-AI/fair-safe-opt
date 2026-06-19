@@ -8,7 +8,7 @@
 ## Hours Completed
 
 - Planned: 40
-- Completed: 
+- Completed: 40
 
 ## Code Or Test Changes
 
@@ -37,36 +37,13 @@
     - *report.py*
       - Created a function which takes in an ```Evaluation``` object and outputs a full run report .md file.
 
-## Logistic Regression Baseline
+- ### paper/
+  - *BaselineReport.pdf*
+    - Added a report of baseline metrics for both mlp and logistic models on seeds 0, 1, and 2.
 
-from ```make baseline-logistic```
+## Results Summary
 
-Total Test Accuracy: 0.8484
-
-Confusion Matrix:
-[[6272  531]
- [ 840 1402]]
-
-Demographic Parity Difference:
-0.18703436851501465
-
-Equal Opportunity Difference:
-0.003864884376525879
-
-
-## MLP Baseline 
-
-Total Test Accuracy: 0.8399
-
-Confusion Matrix:
-[[6288  515]
- [ 933 1309]]
-
-Demographic Parity Difference:
-0.14557848870754242
-
-Equal Opportunity Difference:
-0.09484440088272095
+This week, I've set up a reproducible model evaluation pipeline which takes in training parameters, trains a model, evaluates the model, and prints a report. I then ran this pipeline on each for seeds 0, 1, and 2 to establish baseline results for us to compare to moving forward. I've created a file detailing these results
 
 ## Commit Hashes
 
