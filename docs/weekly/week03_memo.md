@@ -1,4 +1,4 @@
-# Week 1 Summary
+# Week 3 Summary
 
 ## Dates
 
@@ -69,3 +69,5 @@ This week, I've set up a reproducible model evaluation pipeline which takes in t
 - 76854de Updated week 2 memo
 
 ## Next Actions
+
+Implement adversarial attacks
