@@ -12,7 +12,9 @@ def create_report(
     dropout: float, 
     learning_rate: float,
     eval: Evaluation, 
-    out_dir: Path
+    out_dir: Path,
+    attack_method: str = 'none',
+    eps: float | None = None,
 ) -> None:
     output_file = out_dir / "report.md"
     with open(output_file, "w") as f:
@@ -22,7 +24,9 @@ def create_report(
         print("## Model Specifications", file=f)
         print(f" - Architecture: {architecture}", file=f)
         print(f" - Seed: {seed}", file=f)
-        print(f" - Method: {method}", file=f)
+        print(f" - Training Method: {method}", file=f)
+        print(f" - Attack Method: {attack_method}", file=f)
+        print(f" - Epsilon: {eps}", file=f)
         print(f" - Epochs: {epochs}", file=f)
         print(f" - Patience: {patience}", file=f)
         print(f" - Hidden Dimension: {hidden_dim}", file=f)

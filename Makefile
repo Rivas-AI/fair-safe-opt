@@ -12,5 +12,8 @@ check-env:
 inspect-adult:
 	python scripts/inspect_adult.py
 
-report:
-	python scripts/train_and_generate_report.py
+baseline:
+	python scripts/generate_baseline_report.py
+
+attack:
+	python scripts/generate_attack_report.py

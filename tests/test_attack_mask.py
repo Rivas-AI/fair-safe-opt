@@ -40,6 +40,8 @@ def test_fgsm_changes_continuous_features_only() -> None:
         )
         <= 0.05001
     )
+    assert torch.all(attacked[:, dataset.continuous_mask] <= dataset.feature_max[dataset.continuous_mask])
+    assert torch.all(attacked[:, dataset.continuous_mask] >= dataset.feature_min[dataset.continuous_mask])
 
 
 def test_pgd_changes_continuous_features_only() -> None:
@@ -66,3 +68,5 @@ def test_pgd_changes_continuous_features_only() -> None:
         )
         <= 0.05001
     )
+    assert torch.all(attacked[:, dataset.continuous_mask] <= dataset.feature_max[dataset.continuous_mask])
+    assert torch.all(attacked[:, dataset.continuous_mask] >= dataset.feature_min[dataset.continuous_mask])

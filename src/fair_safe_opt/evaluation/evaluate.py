@@ -32,6 +32,8 @@ from fair_safe_opt.metrics.fairness import (
     auc_by_group,
     TPR_by_group
 )
+from fair_safe_opt.attacks.fgsm import fgsm_attack
+from fair_safe_opt.attacks.pgd import pgd_attack
 
 
 def evaluate_binary_classifier(
@@ -120,13 +122,34 @@ def evaluate_model(
     history: TrainingHistory,
     out_dir: Path,
     threshold: float = 0.5,
+    attack_method: str = 'none',
+    eps: float | None = None,
+    alpha: float | None = None,
+    steps: int = 10
 ) -> Evaluation:
     """Calculates metrics for all groups from a given model and saves graph data."""
-
-    features = torch.tensor(split.x_test)
     true_labels = torch.tensor(split.y_test)
     sensitive_col = torch.tensor(split.a_test)
-
+    
+    # Set features based on attack type.
+    if attack_method == 'none':
+        features = torch.tensor(split.x_test)
+    elif attack_method == 'pgd' or attack_method == 'fgsm':
+        print(f"Generating adversarial features. Method: {attack_method}")
+        
+        if eps is None or eps < 0:
+            raise ValueError(f"Incorrect 'eps' parameter value: {eps}")
+        
+        if attack_method == 'fgsm':
+            features = fgsm_attack(model, torch.tensor(split.x_test), true_labels, eps, torch.tensor(split.continuous_mask), torch.tensor(split.feature_min), torch.tensor(split.feature_max))
+        elif attack_method == 'pgd':
+            if alpha is None or alpha < 0:
+                raise ValueError(f"Invalid 'alpha' param value {alpha}")
+            features = pgd_attack(model, torch.tensor(split.x_test), true_labels, eps, alpha, steps, torch.tensor(split.continuous_mask), torch.tensor(split.feature_min), torch.tensor(split.feature_max))
+    else:
+        raise ValueError(f"invalid attack method {attack_method}")
+        
+        
     # Calculate predictions and probabilities
     with torch.no_grad():
         logits = model(features)
