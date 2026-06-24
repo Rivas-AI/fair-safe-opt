@@ -1,0 +1,14 @@
+#Standard training params
+architecture: logistic # Valid: {'logistic', 'small_mlp', 'optimized_mlp'}
+method: erm  # Valid: {'erm'}
+seed: 0
+epochs: 10
+patience: 5
+hidden_dim: 64
+dropout: 0.0
+learning_rate: 1e-4
+
+# Attack params
+attack: fgsm # Valid: {'none', 'fgsm', 'pgd'}
+epsilon: 0.99
+steps: 10
