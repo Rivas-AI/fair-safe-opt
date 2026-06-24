@@ -20,6 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+import torch
 from sklearn.compose import ColumnTransformer
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
@@ -29,18 +30,18 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 @dataclass(frozen=True)
 class AdultSplit:
-    x_train: np.ndarray
-    x_val: np.ndarray
-    x_test: np.ndarray
-    y_train: np.ndarray
-    y_val: np.ndarray
-    y_test: np.ndarray
-    a_train: np.ndarray
-    a_val: np.ndarray
-    a_test: np.ndarray
-    continuous_mask: np.ndarray
-    feature_min: np.ndarray
-    feature_max: np.ndarray
+    x_train: torch.Tensor
+    x_val: torch.Tensor
+    x_test: torch.Tensor
+    y_train: torch.Tensor
+    y_val: torch.Tensor
+    y_test: torch.Tensor
+    a_train: torch.Tensor
+    a_val: torch.Tensor
+    a_test: torch.Tensor
+    continuous_mask: torch.Tensor
+    feature_min: torch.Tensor
+    feature_max: torch.Tensor
     feature_names: list[str]
 
 
@@ -117,17 +118,17 @@ def load_adult(
     feature_max = x_train_np.max(axis=0)
 
     return AdultSplit(
-        x_train=x_train_np,
-        x_val=x_val_np,
-        x_test=x_test_np,
-        y_train=y_train.astype("float32"),
-        y_val=y_val.astype("float32"),
-        y_test=y_test.astype("float32"),
-        a_train=a_train.astype("float32"),
-        a_val=a_val.astype("float32"),
-        a_test=a_test.astype("float32"),
-        continuous_mask=continuous_mask,
-        feature_min=feature_min.astype("float32"),
-        feature_max=feature_max.astype("float32"),
+        x_train=torch.from_numpy(x_train_np),
+        x_val=torch.from_numpy(x_val_np),
+        x_test=torch.from_numpy(x_test_np),
+        y_train=torch.from_numpy(y_train.astype("float32")),
+        y_val=torch.from_numpy(y_val.astype("float32")),
+        y_test=torch.from_numpy(y_test.astype("float32")),
+        a_train=torch.from_numpy(a_train.astype("float32")),
+        a_val=torch.from_numpy(a_val.astype("float32")),
+        a_test=torch.from_numpy(a_test.astype("float32")),
+        continuous_mask=torch.from_numpy(continuous_mask),
+        feature_min=torch.from_numpy(feature_min.astype("float32")),
+        feature_max=torch.from_numpy(feature_max.astype("float32")),
         feature_names=feature_names,
     )
