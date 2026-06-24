@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import balanced_accuracy_score, roc_auc_score
 
 import torch
 
@@ -142,6 +142,23 @@ def auc_by_group(
             result[group] = float(roc_auc_score(y_true[mask].numpy(), probs[mask].numpy()))
     return result
     
+def balanced_accuracy_by_group(
+    predictions: torch.Tensor,
+    y_true: torch.Tensor,
+    sensitive: torch.Tensor,
+) -> dict[int, float]:
+    """Balanced accuracy (average of TPR and TNR) separately for sensitive groups 0 and 1."""
+    result = {}
+    for group in (0, 1):
+        mask = _as_bool_group(sensitive, group)
+        if mask.sum().item() == 0:
+            warnings.warn(f"No samples for group {group}; returning nan.", RuntimeWarning)
+            result[group] = float("nan")
+        else:
+            result[group] = float(balanced_accuracy_score(y_true[mask].numpy(), predictions[mask].numpy()))
+    return result
+
+
 def TPR_by_group(
     predictions: torch.Tensor,
     y_true: torch.Tensor,
