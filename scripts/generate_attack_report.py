@@ -1,79 +1,43 @@
 import torch
-
+import yaml
+from pathlib import Path
 from fair_safe_opt.utils.directories import create_report_dir
 from fair_safe_opt.utils.seeds import set_seed
 
 from fair_safe_opt.data.adult import load_adult
 
-from fair_safe_opt.models.logistic import LogisticRegression
-from fair_safe_opt.models.mlp import SmallMLP, OptimizedMLP
+from fair_safe_opt.models.build import build_model
 
-from fair_safe_opt.training.erm import train_erm, TrainingHistory
+from fair_safe_opt.training.train import train_model
 
-from fair_safe_opt.evaluation.evaluate import evaluate_model, Evaluation
-from fair_safe_opt.reporting.report import create_report
+from fair_safe_opt.evaluation.evaluate import create_metric_table, save_evaluation_plots
+from fair_safe_opt.attacks.attack import attack_features
 
-ARCHITECTURES = ["logistic", "small_mlp"]  # Valid: {'logistic', 'small_mlp', 'optimized_mlp'}
-METHOD = "erm"  # Valid: {'erm'}
-SEEDS = [0]
-ATTACK = 'pgd' # Valid: {'none', 'fgsm', 'pgd'}
-EPSILON = 0.1
-
-# PGD Parameters only
-STEPS = 10
-ALPHA = 2 * (EPSILON / STEPS)
-
-#Standard training params
-EPOCHS = 10
-PATIENCE = 5
-HIDDEN_DIM = 64
-DROPOUT = 0.0
-LEARNING_RATE = 1e-4
-
-
-def run(ARCHITECTURE, SEED):
-    set_seed(SEED)
-    out_dir = create_report_dir(ARCHITECTURE, METHOD, SEED)
-
-    split = load_adult(random_state=SEED)
-
-    # Define model architecture
-    if ARCHITECTURE == "logistic":
-        model = LogisticRegression(split.x_train.shape[1])
-    elif ARCHITECTURE == "small_mlp":
-        model = SmallMLP(split.x_train.shape[1], hidden_dim=HIDDEN_DIM, dropout=DROPOUT)
-    elif ARCHITECTURE == 'optimized_mlp':
-        model = OptimizedMLP(split.x_train.shape[1], hidden_dim=HIDDEN_DIM, dropout=DROPOUT)
-    else:
-        raise ValueError("architecture not in {'logistic', 'small_mlp'}")
-
-    # Train the model using the specified method
-    if METHOD == "erm":
-        history: TrainingHistory = train_erm(
-            model,
-            torch.tensor(split.x_train),
-            torch.tensor(split.y_train),
-            torch.tensor(split.x_val),
-            torch.tensor(split.y_val),
-            out_dir,
-            epochs=EPOCHS,
-            patience=PATIENCE,
-            learning_rate=LEARNING_RATE
-        )
-    else:
-        raise ValueError("method not in {'erm'}")
-
-    eval: Evaluation = evaluate_model(model, split, history, out_dir, attack_method=ATTACK, eps=EPSILON, alpha=ALPHA, steps=STEPS)
-
-    create_report(ARCHITECTURE, METHOD, SEED, EPOCHS, PATIENCE, HIDDEN_DIM, DROPOUT, LEARNING_RATE, eval, out_dir, attack_method=ATTACK, eps=EPSILON)
-
+_CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
+with open(_CONFIG_PATH) as f:
+    config = yaml.safe_load(f)
 
 def main():
-    for architecture in ARCHITECTURES:
-        for seed in SEEDS:
-            print(f"\n=== {architecture} | seed {seed} ===")
-            run(architecture, seed)
+    set_seed(config['seed'])
+    out_dir = create_report_dir(config['architecture'], config['method'], config['seed'])
 
+    split = load_adult(random_state=config['seed'])
+
+    model = build_model(config['architecture'], split, config['hidden_dim'], config['dropout'])
+
+    history = train_model(model, config['method'], split.x_train, split.y_train, split.x_val, split.y_val, out_dir, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'])
+
+    adv_features = attack_features(model, config['attack'], split.x_test, split.y_test, split.continuous_mask, split.feature_min, split.feature_max, config['epsilon'], config['steps'], config['alpha'])
+    
+    with torch.no_grad():
+        logits = model(adv_features)
+        
+    probs = torch.sigmoid(logits)
+    preds = (probs >= config['threshold'])
+    
+    save_evaluation_plots(preds, probs, split.y_test, split.a_test, history, out_dir)
+    metric_table = create_metric_table(preds, probs, split.y_test, split.a_test)
+    print(metric_table)
 
 if __name__ == "__main__":
     main()
