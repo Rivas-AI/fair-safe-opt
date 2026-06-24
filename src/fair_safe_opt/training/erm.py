@@ -9,7 +9,7 @@ import copy
 from pathlib import Path
 
 from fair_safe_opt.metrics.classification import accuracy_from_logits
-
+from fair_safe_opt.utils.devices import set_device
 
 @dataclass(frozen=True)
 class TrainingHistory:
@@ -17,23 +17,6 @@ class TrainingHistory:
     train_accuracies: list[float]
     val_losses: list[float]
     val_accuracies: list[float]
-
-
-def set_device():
-    """
-    Sets device used for training. Heirarchy goes CUDA, MPS, then CPU if none are available.
-    returns:
-    - (torch.device): device to be used.
-    """
-    if torch.cuda.is_available():
-        print("Using CUDA")
-        return torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        print("Using MPS")
-        return torch.device("mps")
-    else:
-        print("Using CPU")
-        return torch.device("cpu")
 
 
 def train_erm(
