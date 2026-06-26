@@ -7,8 +7,9 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import copy
 from pathlib import Path
+from tqdm import tqdm
 
-from fair_safe_opt.metrics.classification import accuracy_from_logits
+from fair_safe_opt.metrics.classification import balanced_accuracy_from_logits
 from fair_safe_opt.utils.devices import set_device
 
 @dataclass(frozen=True)
@@ -21,8 +22,8 @@ class TrainingHistory:
 
 def train_erm(
     model: nn.Module,
-    x: torch.Tensor,
-    y: torch.Tensor,
+    x_train: torch.Tensor,
+    y_train: torch.Tensor,
     x_val: torch.Tensor,
     y_val: torch.Tensor,
     save_dir: Path | None = None,
@@ -31,19 +32,10 @@ def train_erm(
     batch_size: int = 32,
     learning_rate: float = 1e-2,
     patience: int = 5,
-    show_progress: bool = True,
 ) -> TrainingHistory:
-    # Set device
-    device = set_device()
-    model = model.to(device)
-    x = x.to(device)
-    y = y.to(device)
-    x_val = x_val.to(device)
-    y_val = y_val.to(device)
-
     # Define training variables
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    loader = DataLoader(TensorDataset(x, y), batch_size=batch_size, shuffle=True)
+    loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
     train_losses: list[float] = []
     train_accuracies: list[float] = []
     val_losses: list[float] = []
@@ -51,13 +43,7 @@ def train_erm(
     epochs_without_improvement = 0
     best_val_loss = float("inf")  # initialize to infinity
 
-    # Code to show progress bar
-    if show_progress:
-        from tqdm.auto import tqdm
-
-        progress = tqdm(range(epochs), desc="ERM training", unit="epoch")
-    else:
-        progress = range(epochs)
+    progress = tqdm(range(epochs), desc="ERM training", unit="epoch")
 
     # Epoch loop
     for _ in progress:
@@ -71,29 +57,28 @@ def train_erm(
             epoch_losses.append(float(loss.item()))
         model.eval()
         with torch.no_grad():
-            logits_train = model(x)
+            logits_train = model(x_train)
             logits_val = model(x_val)
 
         # Append training metrics
         train_loss = sum(epoch_losses) / len(epoch_losses)
-        train_accuracy = accuracy_from_logits(logits_train, y)
+        train_accuracy = balanced_accuracy_from_logits(logits_train, y_train)
         train_losses.append(train_loss)
         train_accuracies.append(train_accuracy)
 
         # Calculate Validation loss & acc
         val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
-        val_accuracy = accuracy_from_logits(logits_val, y_val)
+        val_accuracy = balanced_accuracy_from_logits(logits_val, y_val)
         val_losses.append(val_loss)
         val_accuracies.append(val_accuracy)
 
         # Update Progress Bar
-        if show_progress:
-            progress.set_postfix(
-                train_loss=f"{train_loss:.4f}",
-                train_acc=f"{train_accuracy:.3f}",
-                val_loss=f"{val_loss:.4f}",
-                val_acc=f"{val_accuracy:.3f}",
-            )
+        progress.set_postfix(
+            train_loss=f"{train_loss:.4f}",
+            balanced_train_acc=f"{train_accuracy:.3f}",
+            val_loss=f"{val_loss:.4f}",
+            balanced_val_acc=f"{val_accuracy:.3f}",
+        )
 
         # Early Stopping
         if val_loss < best_val_loss:
@@ -108,7 +93,6 @@ def train_erm(
                 break
 
     model.load_state_dict(best_state)
-    model.to("cpu")
 
     return TrainingHistory(
         train_losses=train_losses,
