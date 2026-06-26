@@ -22,13 +22,15 @@ class SmallMLP(nn.Module):
         if x.shape[1] != self.net[0].in_features:
             raise ValueError("Input feature dimension mismatch.")
         return self.net(x).squeeze(-1)
-
-    def predict_classes(self, x: torch.Tensor) -> torch.Tensor:
-        self.eval()
+    
+    def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
         with torch.no_grad():
             logits = self.forward(x)
-            return (logits > 0).float()
-
+        
+        probs = torch.sigmoid(logits)
+        preds = (probs >= 0.5).float()
+        
+        return preds, probs
 class OptimizedMLP(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int = 32, dropout: float = 0.0) -> None:
         super().__init__()
@@ -60,3 +62,12 @@ class OptimizedMLP(nn.Module):
         with torch.no_grad():
             logits = self.forward(x)
             return (logits > 0).float()
+        
+    def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
+        with torch.no_grad():
+            logits = self.forward(x)
+        
+        probs = torch.sigmoid(logits)
+        preds = (probs >= 0.5).float()
+        
+        return preds, probs

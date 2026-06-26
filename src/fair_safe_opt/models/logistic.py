@@ -16,7 +16,11 @@ class LogisticRegression(nn.Module):
             raise ValueError("Input feature dimension mismatch.")
         return self.linear(x).squeeze(-1)
 
-    def predict_classes(self, x: torch.Tensor) -> torch.Tensor:
+    def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
         with torch.no_grad():
             logits = self.forward(x)
-            return (logits > 0).float()
+        
+        probs = torch.sigmoid(logits)
+        preds = (probs >= 0.5).float()
+        
+        return preds, probs
