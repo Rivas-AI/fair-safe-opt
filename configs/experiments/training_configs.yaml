@@ -8,9 +8,10 @@ hidden_dim: 64
 dropout: 0.0
 learning_rate: .0001
 threshold: 0.5
+device: cpu
 
 # Attack params
-attack: none # Valid: {'none', 'fgsm', 'pgd'}
+attack: fgsm # Valid: {'none', 'fgsm', 'pgd'}
 epsilon: 0.99
 steps: 10
 alpha: 0.198
