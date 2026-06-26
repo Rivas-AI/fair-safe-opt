@@ -70,33 +70,39 @@ def create_metric_table(preds: torch.Tensor, probs: torch.Tensor, labels: torch.
     group1_auc_score = per_group_auc[1]
     group1_tpr = per_group_tpr[1]
 
-    return pd.DataFrame({
-        "group_0": {
-            "balanced_accuracy": group0_accuracy,
-            "auc": group0_auc_score,
-            "tpr": group0_tpr,
-            "demographic_parity_difference": None,
-            "equal_opportunity_difference": None,
+    df = pd.DataFrame({
+        "balanced_accuracy": {
+            "group_0": group0_accuracy,
+            "group_1": group1_accuracy,
+            "combined": total_accuracy,
         },
-        "group_1": {
-            "balanced_accuracy": group1_accuracy,
-            "auc": group1_auc_score,
-            "tpr": group1_tpr,
-            "demographic_parity_difference": None,
-            "equal_opportunity_difference": None,
+        "auc": {
+            "group_0": group0_auc_score,
+            "group_1": group1_auc_score,
+            "combined": total_auc_score,
         },
-        "combined": {
-            "balanced_accuracy": total_accuracy,
-            "auc": total_auc_score,
-            "tpr": None,
-            "demographic_parity_difference": demographic_par,
-            "equal_opportunity_difference": equal_opp,
+        "advantaged tpr": {
+            "group_0": group0_tpr,
+            "group_1": group1_tpr,
+            "combined": None,
+        },
+        "demographic_parity_difference": {
+            "group_0": None,
+            "group_1": None,
+            "combined": demographic_par,
+        },
+        "equal_opportunity_difference": {
+            "group_0": None,
+            "group_1": None,
+            "combined": equal_opp,
         },
     })
+    
+    return df
 
-def save_evaluation_plots(preds, probs, labels, sensitive, history, out_dir) -> None:
-    plot_history(history, out_dir)
-    plot_roc_confusion(preds, probs, labels, out_dir, "combined")
+def save_evaluation_plots(preds, probs, labels, sensitive, out_dir, prefix='') -> None:
+    '''Plot confusion matrices and roc graphs for each group'''
+    plot_roc_confusion(preds, probs, labels, out_dir, f"{prefix}_combined")
     group0 = sensitive == 0
-    plot_roc_confusion(preds[group0], probs[group0], labels[group0], out_dir, "group0")
-    plot_roc_confusion(preds[~group0], probs[~group0], labels[~group0], out_dir, "group1")
+    plot_roc_confusion(preds[group0], probs[group0], labels[group0], out_dir, f"{prefix}_group0")
+    plot_roc_confusion(preds[~group0], probs[~group0], labels[~group0], out_dir, f"{prefix}_group1")

@@ -35,7 +35,7 @@ def plot_history(history: TrainingHistory, out_dir: Path) -> str:
 
     axes[1].plot(history.train_accuracies, label="Train Acc")
     axes[1].plot(history.val_accuracies, label="Val Acc")
-    axes[1].set_title("Accuracy")
+    axes[1].set_title("Balanced Accuracy")
     axes[1].legend()
 
     filename = "training_curves.png"
