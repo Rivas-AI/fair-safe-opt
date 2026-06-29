@@ -13,7 +13,8 @@ def attack_features(
     feature_maxes: torch.Tensor,
     eps: float, 
     steps: int | None = None,
-    alpha: float | None = None
+    alpha: float | None = None,
+    random_start: bool = False
 ) -> torch.Tensor: 
     '''Generates an adversarial attack of a given method at a given model.'''
     if attack_type == 'none':
@@ -29,7 +30,7 @@ def attack_features(
         elif attack_type == 'pgd':
             if alpha is None or alpha < 0:
                 raise ValueError(f"Invalid 'alpha' param value {alpha}")
-            features = pgd_attack(model, features, labels, eps, alpha, steps, mask, feature_mins, feature_maxes)
+            features = pgd_attack(model, features, labels, eps, alpha, steps, mask, feature_mins, feature_maxes, random_start=random_start)
     else:
         raise ValueError(f"invalid attack attack_type {attack_type}")
     
