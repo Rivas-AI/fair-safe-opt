@@ -10,14 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from fair_safe_opt.metrics.classification import balanced_accuracy_from_logits
-from fair_safe_opt.utils.devices import set_device
-
-@dataclass(frozen=True)
-class TrainingHistory:
-    train_losses: list[float]
-    train_accuracies: list[float]
-    val_losses: list[float]
-    val_accuracies: list[float]
+from fair_safe_opt.training.training_history import TrainingHistory
 
 
 def train_erm(
@@ -26,13 +19,16 @@ def train_erm(
     y_train: torch.Tensor,
     x_val: torch.Tensor,
     y_val: torch.Tensor,
-    save_dir: Path | None = None,
     *,
+    save_dir: Path | None = None,
     epochs: int = 5,
     batch_size: int = 32,
     learning_rate: float = 1e-2,
     patience: int = 5,
 ) -> TrainingHistory:
+    '''
+    Train a model using Empirical Risk Minimization (ERM) with early stopping.
+    '''
     # Define training variables
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
