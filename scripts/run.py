@@ -10,7 +10,7 @@ from fair_safe_opt.data.adult import load_adult
 
 from fair_safe_opt.models.build import build_model
 
-from fair_safe_opt.training.train import train_model
+from fair_safe_opt.training.adversarial import train_pgd_adversarial
 
 from fair_safe_opt.evaluation.evaluate import save_evaluation_plots, create_metric_table
 from fair_safe_opt.metrics.attacks import attack_success_by_group
@@ -44,7 +44,8 @@ def run_single(seed, architecture, epsilon):
     model.to(device)
     x_train, y_train, x_val, y_val = split.x_train.to(device), split.y_train.to(device), split.x_val.to(device), split.y_val.to(device)
 
-    history = train_model(model, config['method'], x_train, y_train, x_val, y_val, out_dir, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'], device=config['device'])
+    alpha=2*(epsilon / config['steps'])
+    history = train_pgd_adversarial(model, x_train, y_train, x_val, y_val, split.continuous_mask, out_dir=out_dir, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'], epsilon=epsilon, alpha=alpha, steps=config['steps'])
 
     model.to('cpu')
 
