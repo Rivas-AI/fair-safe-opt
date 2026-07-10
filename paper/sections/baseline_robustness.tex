@@ -1,0 +1,176 @@
+\documentclass[11pt]{article}
+
+% ---------- Packages ----------
+\usepackage[margin=.5in]{geometry}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{float}
+
+\setstretch{1.15}
+
+% ---------- Paper Info ----------
+\title{Evaluation: \textit{Baseline Robustness Against PGD and FGSM Attacks}}
+\author{Jeremy Frank}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+
+This is a results summary of how I implemented FGSM and PGD, and how both the baseline logistic and small MLP models performed under varying attack strengths. I found that, since there are are only 6 continuous dimensions subject to perturbation, the attacks had only moderate success and required a larger epsilon than is conventional. Under the attacks, models suffered reduced balanced accuracy and AUC, while demographic parity difference increased. An interesting result is that Equal Opportunity Difference dropped when models were subjected to attacks.
+
+\section*{Background}
+
+\subsection*{Attacks}
+
+\subsubsection*{Fast Gradient Sign Method (FGSM)}
+
+This algorithm linearizes the cost gradient function $J$ by taking the sign of each element and applying a constant size $\varepsilon$. That is, for a set of model parameters $\theta$, an input $x$, and a target output $y$, the FGSM perturbation is a single step in the direction of steepest loss increase,
+$$\delta = \varepsilon\,\operatorname{sign}\!\left(\nabla_x J(\theta, x, y)\right),$$
+giving the perturbed input $x^{adv} = x + \delta$.
+
+\subsubsection*{Projected Gradient Descent (PGD)}
+PGD applies the same sign-gradient principle iteratively, taking smaller steps of
+size $\alpha$ and projecting back into the $\varepsilon$-ball around $x$ after each step:
+$$x^{adv}_{t+1} = \Pi_{x,\varepsilon}\!\left(x^{adv}_t + \alpha\,\operatorname{sign}\!\left(\nabla_x J(\theta, x^{adv}_t, y)\right)\right),$$
+where $\Pi_{x,\varepsilon}$ projects onto the perturbation set: an $\varepsilon$-radius
+$\ell_\infty$ ball centered at the original input $x$, restricted to continuous features.
+ 
+
+\subsubsection*{Choosing $\varepsilon$}
+It took some experimentation to find effective values for $\varepsilon$ which affected performance but did not create model collapse. I began using the conventional values $\varepsilon = \{0.01, 0.03, 0.05\}$ and found that these did not meaningfully affect the model predictions. I theorize two reasons for this: 
+\begin{itemize}
+    \item \textbf{Low continuous feature dimension} \:\: We have restricted our perturbations to continuous features, of which there are only 6. This makes up ~$6\%$ of our feature space after one-hot encoding, and is a far cry from the 784 perturbable dimensions of an MNIST image.
+    \item \textbf{Use of StandardScaler instead of MinMax} \:\: Since Adult has continuous features with extreme outliers (e.g.\ \texttt{capital\_gain}), I standardize with StandardScaler rather than the conventional MinMaxScaler. This changes what $\varepsilon$ means. Under MinMaxScaler, every feature is squeezed into $[0,1]$, so an $\varepsilon$-sized $\ell_\infty$ perturbation is a fraction of each feature's full observed range. Under StandardScaler, features are expressed in z-score units (mean $0$, standard deviation $1$), so $\varepsilon$ is measured in standard deviations: an $\varepsilon = 0.1$ perturbation moves a feature by one-tenth of a standard deviation, regardless of its raw range. A perturbation that is meaningful in $[0,1]$ units is therefore much larger in standard-deviation units, which is why the conventional $\varepsilon \in \{0.01, 0.03, 0.05\}$ had little effect and a larger $\varepsilon$ was needed to produce graded degradation. 
+\end{itemize}
+With these two considerations in mind, I swept through models with larger $\varepsilon$ values, and found that meaningful yet restrained model performance reductions occured around $\varepsilon \in [0.1, 0.3]$.
+
+
+\subsection*{Evaluation}
+
+Baseline ($\varepsilon = 0$) reports absolute values averaged over 3 seeds; subsequent rows report
+the change ($\Delta \times 100$) from baseline (also as an average). Attack success is an absolute
+rate, reported only for attacked rows. G0 = group 0, G1 = group 1. Additionally, for PGD, all runs used 10 steps with $\alpha = 2 \cdot \frac{\varepsilon}{\text{steps}}$.
+
+\subsubsection*{Combined Results}
+
+\begin{table}[H]
+\centering
+\caption{FGSM attack results over all classes}
+\label{tab:fgsm}
+\begin{tabular}{llrrrrr}
+\toprule
+Model & $\varepsilon$ & Bal.\ Acc. & AUC & DPD & EOpp & Atk.\ Succ. \\
+\midrule
+\multirow{4}{*}{Logistic}
+ & 0.00 & 72.14 & 89.39 & 17.98 & 23.08 & \\
+ & 0.10 & $-3.09$ & $-3.79$ & $+0.26$ & $-0.52$ & 2.91 \\
+ & 0.20 & $-6.19$ & $-8.33$ & $+0.71$ & $-2.34$ & 5.97 \\
+ & 0.30 & $-9.33$ & $-13.52$ & $+1.25$ & $-3.58$ & 9.23 \\
+\midrule
+\multirow{4}{*}{Small MLP}
+ & 0.00 & 78.10 & 90.86 & 19.28 & 9.76 & \\
+ & 0.10 & $-4.05$ & $-4.47$ & $+1.51$ & $-0.88$ & 4.81 \\
+ & 0.20 & $-9.17$ & $-10.16$ & $+4.14$ & $-0.62$ & 11.21 \\
+ & 0.30 & $-14.59$ & $-17.04$ & $+6.26$ & $-1.39$ & 18.01 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{PGD attack results over all classes}
+\label{tab:pgd}
+\begin{tabular}{llrrrrr}
+\toprule
+Model & $\varepsilon$ & Bal.\ Acc. & AUC & DPD & EOpp & Atk.\ Succ. \\
+\midrule
+\multirow{4}{*}{Logistic}
+ & 0.00 & 72.14 & 89.39 & 17.98 & 23.08 & \\
+ & 0.10 & $-3.09$ & $-3.79$ & $+0.26$ & $-0.52$ & 2.91 \\
+ & 0.20 & $-6.19$ & $-8.33$ & $+0.71$ & $-2.34$ & 5.97 \\
+ & 0.30 & $-9.33$ & $-13.52$ & $+1.25$ & $-3.58$ & 9.23 \\
+\midrule
+\multirow{4}{*}{Small MLP}
+ & 0.00 & 78.10 & 90.86 & 19.28 & 9.76 & \\
+ & 0.10 & $-4.05$ & $-4.47$ & $+1.50$ & $-0.90$ & 4.81 \\
+ & 0.20 & $-9.17$ & $-10.16$ & $+4.14$ & $-0.62$ & 11.21 \\
+ & 0.30 & $-14.60$ & $-17.05$ & $+6.24$ & $-1.39$ & 18.01 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Per-Group Results}
+
+\begin{table}[H]
+\centering
+\caption{FGSM results per group}
+\label{tab:fgsm-by-group}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll rr rr rr rr}
+\toprule
+ & & \multicolumn{2}{c}{Bal.\ Acc.} & \multicolumn{2}{c}{AUC}
+   & \multicolumn{2}{c}{Adv.\ TPR} & \multicolumn{2}{c}{Atk.\ Succ.} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+Model & $\varepsilon$ & G0 & G1 & G0 & G1 & G0 & G1 & G0 & G1 \\
+\midrule
+\multirow{4}{*}{Logistic}
+ & 0.00 & 72.50 & 64.56 & 86.87 & 91.98 & 53.35 & 30.27 & & \\
+ & 0.10 & $-3.50$ & $-2.28$ & $-4.55$ & $-3.54$ & $-4.49$ & $-3.96$ & 3.94 & 1.08 \\
+ & 0.20 & $-7.21$ & $-3.87$ & $-9.85$ & $-8.10$ & $-8.94$ & $-6.60$ & 8.25 & 1.94 \\
+ & 0.30 & $-10.91$ & $-5.73$ & $-15.71$ & $-13.73$ & $-13.10$ & $-9.52$ & 12.68 & 3.09 \\
+\midrule
+\multirow{4}{*}{Small MLP}
+ & 0.00 & 77.24 & 76.49 & 88.56 & 93.41 & 65.38 & 55.62 & & \\
+ & 0.10 & $-4.89$ & $-2.45$ & $-5.54$ & $-3.64$ & $-4.07$ & $-3.19$ & 6.36 & 2.03 \\
+ & 0.20 & $-11.10$ & $-5.92$ & $-12.34$ & $-8.65$ & $-8.47$ & $-7.85$ & 14.80 & 4.79 \\
+ & 0.30 & $-17.64$ & $-9.36$ & $-20.15$ & $-15.17$ & $-13.28$ & $-11.89$ & 23.59 & 8.02 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{PGD results per group}
+\label{tab:pgd-by-group}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll rr rr rr rr}
+\toprule
+ & & \multicolumn{2}{c}{Bal.\ Acc.} & \multicolumn{2}{c}{AUC}
+   & \multicolumn{2}{c}{Adv.\ TPR} & \multicolumn{2}{c}{Atk.\ Succ.} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+Model & $\varepsilon$ & G0 & G1 & G0 & G1 & G0 & G1 & G0 & G1 \\
+\midrule
+\multirow{4}{*}{Logistic}
+ & 0.00 & 72.50 & 64.56 & 86.87 & 91.98 & 53.35 & 30.27 & & \\
+ & 0.10 & $-3.50$ & $-2.28$ & $-4.55$ & $-3.54$ & $-4.49$ & $-3.96$ & 3.94 & 1.08 \\
+ & 0.20 & $-7.21$ & $-3.87$ & $-9.85$ & $-8.10$ & $-8.94$ & $-6.60$ & 8.25 & 1.94 \\
+ & 0.30 & $-10.91$ & $-5.73$ & $-15.71$ & $-13.73$ & $-13.10$ & $-9.52$ & 12.68 & 3.09 \\
+\midrule
+\multirow{4}{*}{Small MLP}
+ & 0.00 & 77.24 & 76.49 & 88.56 & 93.41 & 65.38 & 55.62 & & \\
+ & 0.10 & $-4.90$ & $-2.45$ & $-5.54$ & $-3.64$ & $-4.09$ & $-3.19$ & 6.37 & 2.03 \\
+ & 0.20 & $-11.10$ & $-5.92$ & $-12.35$ & $-8.65$ & $-8.47$ & $-7.85$ & 14.80 & 4.79 \\
+ & 0.30 & $-17.64$ & $-9.37$ & $-20.16$ & $-15.18$ & $-13.28$ & $-11.89$ & 23.59 & 8.03 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{Conclusions}
+
+We can see the effects of our attacks on the baseline models in tables 1 \& 2.  The first thing I noticed was the near-identical nature of the values for FGSM and PGD. I believe this to be a product of the linearity of this model; for logistic regression, the loss surface is linear and therefore FGSM is already near-optimal. This implies that PGD and FGSM would be nearly identical. 
+
+For the Small MLP model, there is slightly more difference between FGSM and PGD, however they are still effectively identical. The cause of this is the constrained feature space and also small size of the model. These two factors severely limit the interior pathway to be leveraged by PGD that makes it stronger than FGSM. 
+
+In both cases, we see the expected, meaningful reductions in balanced accuracy and AUC. We also see an increase in Demographic Parity Difference (DPD) which is also expected, and it makes sense that the MLP suffers more harm from the attacks because it has a more flexible decision boundary.
+
+The most unexpected result is that Equal Opportunity Difference (EOpp)  falls when the model is subjected to adversarial examples. We can see that this is because the advantaged TPR for group 1 falls at a smaller rate than it does for group 0, bringing the two values closer together. It's important to note, however, that group 1's TPR falls at a higher \textit{relative} rate, since it starts from a lower baseline — so although the EOpp gap narrows, group 1 arguably bears the greater proportional harm.
+
+\end{document}
