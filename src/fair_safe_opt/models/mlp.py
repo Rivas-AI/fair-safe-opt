@@ -26,10 +26,10 @@ class SmallMLP(nn.Module):
     def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
         with torch.no_grad():
             logits = self.forward(x)
-        
+
         probs = torch.sigmoid(logits)
-        preds = (probs >= 0.5).float()
-        
+        preds = (probs >= threshold).float()
+
         return preds, probs
 class OptimizedMLP(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int = 32, dropout: float = 0.0) -> None:

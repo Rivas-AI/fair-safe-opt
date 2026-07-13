@@ -21,6 +21,6 @@ class LogisticRegression(nn.Module):
             logits = self.forward(x)
         
         probs = torch.sigmoid(logits)
-        preds = (probs >= 0.5).float()
+        preds = (probs >= threshold).float()
         
         return preds, probs
