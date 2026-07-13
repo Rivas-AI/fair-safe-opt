@@ -8,7 +8,6 @@ def attack_success_rate(true_labels, baseline_preds, attacked_preds) -> float:
     attacked_wrong = (true_labels != attacked_preds)
     successful_attacks = (baseline_correct & attacked_wrong).float()
     rate = successful_attacks.sum() / amount_correct
-    print(f'Attack Success: {successful_attacks.sum()} / {amount_correct} ({rate})')
     return rate.item()
 
 
