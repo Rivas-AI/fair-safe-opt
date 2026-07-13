@@ -20,7 +20,7 @@ def train_erm(
     x_val: torch.Tensor,
     y_val: torch.Tensor,
     *,
-    save_dir: Path | None = None,
+    out_dir: Path | None = None,
     epochs: int = 5,
     batch_size: int = 32,
     learning_rate: float = 1e-2,
@@ -81,8 +81,8 @@ def train_erm(
             epochs_without_improvement = 0
             best_val_loss = val_loss
             best_state = copy.deepcopy(model.state_dict())
-            if save_dir is not None:
-                torch.save(best_state, save_dir / "best_model.pt")
+            if out_dir is not None:
+                torch.save(best_state, out_dir / "best_model.pt")
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= patience:
