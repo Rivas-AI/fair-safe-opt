@@ -59,7 +59,7 @@ def create_metric_table(preds: torch.Tensor, probs: torch.Tensor, labels: torch.
     per_group_acc = balanced_accuracy_by_group(preds, labels, sensitive)
     per_group_auc = auc_by_group(probs, labels, sensitive)
     per_group_tpr = TPR_by_group(preds, labels, sensitive)
-
+    combined_tpr = per_group_tpr[2]  # True positive rate for the combined groups
     # Metrics for group 0
     group0_accuracy = per_group_acc[0]
     group0_auc_score = per_group_auc[0]
@@ -71,30 +71,35 @@ def create_metric_table(preds: torch.Tensor, probs: torch.Tensor, labels: torch.
     group1_tpr = per_group_tpr[1]
 
     df = pd.DataFrame({
+        "group": {
+            "0": "group_0",
+            "1": "group_1",
+            "2": "combined"
+        },
         "balanced_accuracy": {
-            "group_0": group0_accuracy,
-            "group_1": group1_accuracy,
-            "combined": total_accuracy,
+            "0": group0_accuracy,
+            "1": group1_accuracy,
+            "2": total_accuracy,
         },
         "auc": {
-            "group_0": group0_auc_score,
-            "group_1": group1_auc_score,
-            "combined": total_auc_score,
+            "0": group0_auc_score,
+            "1": group1_auc_score,
+            "2": total_auc_score,
         },
-        "advantaged tpr": {
-            "group_0": group0_tpr,
-            "group_1": group1_tpr,
-            "combined": None,
+        "advantaged_tpr": {
+            "0": group0_tpr,
+            "1": group1_tpr,
+            "2": combined_tpr,
         },
         "demographic_parity_difference": {
-            "group_0": None,
-            "group_1": None,
-            "combined": demographic_par,
+            "0": None,
+            "1": None,
+            "2": demographic_par,
         },
         "equal_opportunity_difference": {
-            "group_0": None,
-            "group_1": None,
-            "combined": equal_opp,
+            "0": None,
+            "1": None,
+            "2": equal_opp,
         },
     })
     
