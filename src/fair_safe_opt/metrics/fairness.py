@@ -151,10 +151,12 @@ def TPR_by_group(
     """True positive rate separately for sensitive groups 0 and 1."""
     positives = y_true.to(torch.long) == 1
 
+    tpr_combined = _rate(predictions.float(), positives, "combined positive group")
     tpr0 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 0), "positive group 0")
     tpr1 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 1), "positive group 1")
 
     return {
         0: float(tpr0.item()),
         1: float(tpr1.item()),
+        2: float(tpr_combined.item())
     }
