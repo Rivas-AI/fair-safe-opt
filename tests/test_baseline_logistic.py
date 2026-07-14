@@ -19,7 +19,7 @@ def test_malformed_input() -> None:
     """Test that the model raises an error for malformed input."""
     model = LogisticRegression(input_dim=5)
     with pytest.raises(ValueError, match="Input feature dimension mismatch."):
-        model.predict_classes(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
+        model.preds_probs(torch.tensor([[1, 2], [3, 4]]))  # Wrong input shape
 
 
 def test_forward_logits() -> None:
@@ -44,8 +44,9 @@ def test_predictions(monkeypatch) -> None:
     adult_split: AdultSplit = load_adult()
 
     model = LogisticRegression(input_dim=adult_split.x_train.shape[1])
-    preds = model.predict_classes(torch.tensor(adult_split.x_test))
+    preds, probs = model.preds_probs(torch.tensor(adult_split.x_test))
     assert preds.shape == adult_split.y_test.shape
+    assert probs.shape == adult_split.y_test.shape
     assert set(preds.tolist()).issubset({0.0, 1.0})
 
 
@@ -62,7 +63,6 @@ def test_training(monkeypatch) -> None:
         torch.tensor(adult_split.x_val),
         torch.tensor(adult_split.y_val),
         epochs=2,
-        show_progress=False,
     )
     assert len(history.train_losses) == 2
     assert len(history.train_accuracies) == 2
@@ -90,7 +90,6 @@ def test_training_updates_weights(monkeypatch) -> None:
         torch.tensor(adult_split.x_val),
         torch.tensor(adult_split.y_val),
         epochs=2,
-        show_progress=False,
     )
 
     after = model.linear.weight.detach()
@@ -117,7 +116,6 @@ def test_training_stops_after_patience_without_improvement() -> None:
         batch_size=4,
         learning_rate=0.0,
         patience=1,
-        show_progress=False,
     )
 
     assert len(history.train_losses) == 2
@@ -134,6 +132,22 @@ def test_prediction_threshold() -> None:
 
     x = torch.tensor([[-1.0], [0.0], [1.0]])
 
-    preds = model.predict_classes(x)
+    preds, _ = model.preds_probs(x)
 
-    assert torch.equal(preds, torch.tensor([0.0, 0.0, 1.0]))
+    assert torch.equal(preds, torch.tensor([0.0, 1.0, 1.0]))
+
+
+def test_preds_probs_threshold_changes_predictions() -> None:
+    """Test that the threshold argument actually changes which predictions are positive."""
+    model = LogisticRegression(input_dim=1)
+
+    with torch.no_grad():
+        model.linear.weight.fill_(1.0)
+        model.linear.bias.fill_(0.0)
+
+    x = torch.tensor([[0.2]])
+
+    preds_low, _ = model.preds_probs(x, threshold=0.2)
+    preds_high, _ = model.preds_probs(x, threshold=0.8)
+
+    assert not torch.equal(preds_low, preds_high)

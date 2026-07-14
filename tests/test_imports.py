@@ -1,6 +1,7 @@
 import fair_safe_opt
 import pandas as pd
 import numpy as np
+import torch
 from fair_safe_opt.data.adult import load_adult
 from sklearn.utils import Bunch
 
@@ -148,7 +149,7 @@ def test_adult_columns(monkeypatch) -> None:
     adult = load_adult()
 
     assert adult.x_train.shape[1] == len(adult.feature_names)
-    assert adult.x_train.shape[1] >= np.sum(adult.continuous_mask) + 18  # 2*9 categorical columns
+    assert adult.x_train.shape[1] >= int(adult.continuous_mask.sum()) + 18  # 2*9 categorical columns
     assert "sex" not in adult.feature_names
     assert "class" not in adult.feature_names
 
@@ -175,10 +176,10 @@ def test_continuous_mask(monkeypatch) -> None:
     continuous_cols = adult.x_train[0][adult.continuous_mask]
     categorical_cols = adult.x_train[0][~adult.continuous_mask]
 
-    assert type(continuous_cols) is np.ndarray
+    assert type(continuous_cols) is torch.Tensor
     assert continuous_cols.shape[0] + categorical_cols.shape[0] == adult.x_train.shape[1]
-    assert set(continuous_cols) != {0, 1}
-    assert set(categorical_cols) == {0, 1}
+    assert set(continuous_cols.tolist()) != {0, 1}
+    assert set(categorical_cols.tolist()) == {0, 1}
 
 
 def test_standard_scaled_features(monkeypatch) -> None:
@@ -187,5 +188,5 @@ def test_standard_scaled_features(monkeypatch) -> None:
 
     continuous_train = adult.x_train[:, adult.continuous_mask]
 
-    assert np.all(abs(continuous_train.mean(axis=0)) < 1e-6)
-    assert np.all(abs(1 - continuous_train.std(axis=0)) < 1e-6)
+    assert torch.all(abs(continuous_train.mean(axis=0)) < 1e-6)
+    assert torch.all(abs(1 - continuous_train.std(axis=0, correction=0)) < 1e-6)
