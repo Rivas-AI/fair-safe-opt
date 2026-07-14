@@ -12,8 +12,5 @@ check-env:
 inspect-adult:
 	python scripts/inspect_adult.py
 
-run:
-	python scripts/run.py
-
-play: 
-	python scripts/baseline_v_attack.py
+baseline_robustness:
+	python scripts/baseline_robustness_eval.py
