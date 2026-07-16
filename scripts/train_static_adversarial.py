@@ -10,6 +10,8 @@ from fair_safe_opt.data.adult import load_adult, AdultSplit
 from fair_safe_opt.models.build import build_model
 from fair_safe_opt.training.erm import train_erm
 from fair_safe_opt.utils.seeds import set_seed
+from fair_safe_opt.training.training_history import save_training_history
+from fair_safe_opt.evaluation.plot import plot_history
 
 from pathlib import Path
 
@@ -44,7 +46,7 @@ def make_pgd_dataset(model, split, epsilon, steps, alpha):
     return aggregated_training_features, aggregated_val_features
 
 def run_single(architecture, epsilon, seed):
-    baseline_path = Path(f'trained_models/baseline/{architecture}_{seed}/best_model.pt')
+    baseline_path = Path(f'trained_models/baseline/{architecture}_eps0.0_{seed}/best_model.pt')
     pgd_data_path = Path(_PGD_DATASET_PATH / f'{architecture}_eps{epsilon}_seed{seed}.pt')
     save_dir = Path(f'trained_models/adversarial/static_pgd/{architecture}_eps{epsilon}_{seed}')
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -76,6 +78,8 @@ def run_single(architecture, epsilon, seed):
         adv_model.train()
         adv_model.to(config['device'])
         history = train_erm(adv_model, pgd_train_tensor, split.y_train.repeat(_NUM_PGD_EXAMPLES+1), pgd_val_tensor, split.y_val.repeat(_NUM_PGD_EXAMPLES+1), epochs=config['epochs'], learning_rate=config['learning_rate'], out_dir=save_dir)
+        save_training_history(history, save_dir / 'training_history.json')
+        plot_history(history, save_dir)
         adv_model.to('cpu')
 
 def main():

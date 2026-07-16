@@ -12,6 +12,7 @@ from fair_safe_opt.utils.devices import set_device
 from fair_safe_opt.data.adult import load_adult, AdultSplit
 from fair_safe_opt.models.build import build_model
 from fair_safe_opt.training.adversarial import train_pgd_madry
+from fair_safe_opt.training.training_history import save_training_history
 
 _CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
 
@@ -51,7 +52,8 @@ def get_or_train_adversarial(seed: int, architecture: str, training_epsilon: flo
         save_config_snapshot(seed, architecture, config['hidden_dim'], config['dropout'], training_epsilon, save_dir / 'config.yaml')
         model.to(device)
         x_train, y_train, x_val, y_val = split.x_train.to(device), split.y_train.to(device), split.x_val.to(device), split.y_val.to(device)
-        train_pgd_madry(model, x_train, y_train, x_val, y_val, epsilon=training_epsilon, out_dir=save_dir, continuous_mask=split.continuous_mask, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'])
+        history = train_pgd_madry(model, x_train, y_train, x_val, y_val, epsilon=training_epsilon, out_dir=save_dir, continuous_mask=split.continuous_mask, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'])
+        save_training_history(history, save_dir / 'training_history.json')
         model.to('cpu')
 
     return model, split

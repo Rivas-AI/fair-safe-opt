@@ -28,7 +28,7 @@ def main():
         
     Path.mkdir(out_dir, exist_ok=True, parents=True)
     
-    metrics_dict = evaluation_sweep(config['architecture_sweep'], config['epsilon_sweep'], config['seed_sweep'], model_save_dir=saved_model_loc, as_deltas=True)
+    metrics_dict = evaluation_sweep(config['architecture_sweep'], config['epsilon_sweep'], config['seed_sweep'], model_save_dir=saved_model_loc, training_epsilon=config['training_epsilon'], as_deltas=True)
     
     for name, table in metrics_dict.items():
         print(name)
