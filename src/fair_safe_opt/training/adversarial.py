@@ -12,7 +12,7 @@ from fair_safe_opt.attacks.pgd import pgd_attack
 from fair_safe_opt.training.training_history import TrainingHistory
 
 
-def train_pgd_adversarial(
+def train_pgd_madry(
     model: nn.Module,
     x_train: torch.Tensor,
     y_train: torch.Tensor,
