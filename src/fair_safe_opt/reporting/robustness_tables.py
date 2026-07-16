@@ -32,12 +32,14 @@ def split_by_group(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
 def values_as_deltas(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    baseline_row = pd.Series()
+    baseline_rows = {}
 
     for idx, row in df.iterrows():
+        key = (row['architecture'], row.get('group'))
         if row['epsilon'] == 0.0:
-            baseline_row = row
+            baseline_rows[key] = row
         else:
+            baseline_row = baseline_rows[key]
             for col in df.columns:
                 if col not in ['seed', 'architecture', 'epsilon', 'group']:
                     df.at[idx, col] = row[col] - baseline_row[col]
