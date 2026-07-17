@@ -19,9 +19,9 @@ with open(_CONFIG_PATH) as f:
     config = yaml.safe_load(f)
 
 
-def evaluate_single(model, split, architecture, epsilon, seed):
+def evaluate_single(model, split, architecture, epsilon, seed, training_style):
     alpha = 2 * epsilon / config['steps']
-    pgd_attacked_features_path = Path(_PGD_SAVE_DIR / f'{architecture}_{seed}_{epsilon}')
+    pgd_attacked_features_path = Path(_PGD_SAVE_DIR / f'{training_style}_{architecture}_{seed}_{epsilon}')
     if pgd_attacked_features_path.exists():
         adv_features = torch.load(pgd_attacked_features_path)
     else:
@@ -45,7 +45,7 @@ def evaluate_single(model, split, architecture, epsilon, seed):
     return adv_metrics_df
 
 
-def evaluation_sweep(architectures, epsilons, seeds, *, model_save_dir: Path = Path.cwd(), training_epsilon: float = 0.0, as_deltas: bool = False):
+def evaluation_sweep(architectures, epsilons, seeds, training_style, *, model_save_dir: Path = Path.cwd(), training_epsilon: float = 0.0, as_deltas: bool = False):
     '''
     Sweeps across all parameters, creating a table with all metrics for all data and returning it divided by group.
 
@@ -71,7 +71,7 @@ def evaluation_sweep(architectures, epsilons, seeds, *, model_save_dir: Path = P
                         f"Run train_static_adversarial.py first."
                         )
 
-                results_df = evaluate_single(model, split, architecture, epsilon, seed)
+                results_df = evaluate_single(model, split, architecture, epsilon, seed, training_style)
                 full_df = pd.concat([full_df, results_df], axis=0)
 
     averaged_df = average_over_seeds(full_df)
