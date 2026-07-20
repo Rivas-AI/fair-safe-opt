@@ -8,6 +8,8 @@ class TrainingHistory:
     train_accuracies: list[float]
     val_losses: list[float]
     val_accuracies: list[float]
+    train_fairnesses: list[float] = []
+    train_accuracies: list[float] = []
 
 
 def save_training_history(history: TrainingHistory, path: str) -> None:
