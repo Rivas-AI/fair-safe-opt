@@ -51,8 +51,8 @@ def get_or_train_adversarial(seed: int, architecture: str, training_epsilon: flo
     else:
         save_config_snapshot(seed, architecture, config['hidden_dim'], config['dropout'], training_epsilon, save_dir / 'config.yaml')
         model.to(device)
-        x_train, y_train, x_val, y_val = split.x_train.to(device), split.y_train.to(device), split.x_val.to(device), split.y_val.to(device)
-        history = train_pgd_madry(model, x_train, y_train, x_val, y_val, epsilon=training_epsilon, out_dir=save_dir, continuous_mask=split.continuous_mask, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'])
+        x_train, y_train, a_train, x_val, y_val, a_val = split.x_train.to(device), split.y_train.to(device), split.a_train.to(device), split.x_val.to(device), split.y_val.to(device), split.a_val.to(device)
+        history = train_pgd_madry(model, x_train, y_train, a_train, x_val, y_val, a_val, epsilon=training_epsilon, out_dir=save_dir, continuous_mask=split.continuous_mask, epochs=config['epochs'], patience=config['patience'], learning_rate=config['learning_rate'], fairness_metric=config['fairness_metric'])
         save_training_history(history, save_dir / 'training_history.json')
         model.to('cpu')
 
@@ -60,8 +60,8 @@ def get_or_train_adversarial(seed: int, architecture: str, training_epsilon: flo
 
 
 def main():
-    for architecture in ['logistic', 'small_mlp']:
-        for seed in config['seeds']:
+    for architecture in config['architecture_sweep']:
+        for seed in config['seed_sweep']:
             print(f"\n--- arch={architecture} training epsilon={_TRAINING_EPS} seed={seed} ---")
             get_or_train_adversarial(seed, architecture, _TRAINING_EPS)
 

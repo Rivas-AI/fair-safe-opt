@@ -1,15 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from dataclasses import asdict
 
 @dataclass(frozen=True)
 class TrainingHistory:
-    train_losses: list[float]
-    train_accuracies: list[float]
-    val_losses: list[float]
-    val_accuracies: list[float]
-    train_fairnesses: list[float] = []
-    train_accuracies: list[float] = []
+    train_losses: list[float] = field(default_factory=list)
+    train_accuracies: list[float] = field(default_factory=list)
+    val_losses: list[float] = field(default_factory=list)
+    val_accuracies: list[float] = field(default_factory=list)
+    train_surrogates: list[float] = field(default_factory=list)
+    val_surrogates: list[float] = field(default_factory=list)
+    lambdas: list[float] = field(default_factory=list)
+    penalties: list[float] = field(default_factory=list)
 
 
 def save_training_history(history: TrainingHistory, path: str) -> None:

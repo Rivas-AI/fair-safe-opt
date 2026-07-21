@@ -8,6 +8,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from fair_safe_opt.metrics.classification import balanced_accuracy_from_logits
+from fair_safe_opt.training.fair_adversarial import fairness_surrogate
 from fair_safe_opt.attacks.pgd import pgd_attack
 from fair_safe_opt.training.training_history import TrainingHistory
 
@@ -16,8 +17,10 @@ def train_pgd_madry(
     model: nn.Module,
     x_train: torch.Tensor,
     y_train: torch.Tensor,
+    a_train: torch.Tensor,
     x_val: torch.Tensor,
     y_val: torch.Tensor,
+    a_val: torch.Tensor, 
     continuous_mask: torch.Tensor,
     *,
     out_dir: Path | None = None,
@@ -28,6 +31,7 @@ def train_pgd_madry(
     alpha: float = 0.01,
     steps: int = 10,
     patience: int = 5,
+    fairness_metric: str = 'dp'
 ) -> TrainingHistory:
     '''
     Train a model using adversarial training with PGD attacks and early stopping.
@@ -37,8 +41,10 @@ def train_pgd_madry(
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
     train_losses: list[float] = []
     train_accuracies: list[float] = []
+    train_surrogates: list[float] = []
     val_losses: list[float] = []
     val_accuracies: list[float] = []
+    val_surrogates: list[float] = []
     epochs_without_improvement = 0
     best_val_loss = float("inf")  # initialize to infinity
 
@@ -68,21 +74,27 @@ def train_pgd_madry(
         # Append training metrics
         train_loss = sum(epoch_losses) / len(epoch_losses)
         train_accuracy = balanced_accuracy_from_logits(logits_train, y_train)
+        train_surrogate = fairness_surrogate(logits_train, y_train, a_train, fairness_metric)
         train_losses.append(train_loss)
         train_accuracies.append(train_accuracy)
+        train_surrogates.append(train_surrogate.item())
 
         # Calculate Validation loss & acc
         val_loss = nn.functional.binary_cross_entropy_with_logits(logits_val, y_val.float()).item()
         val_accuracy = balanced_accuracy_from_logits(logits_val, y_val)
+        val_surrogate = fairness_surrogate(logits_val, y_val, a_val, fairness_metric)
         val_losses.append(val_loss)
         val_accuracies.append(val_accuracy)
+        val_surrogates.append(val_surrogate.item())
 
         # Update Progress Bar
         progress.set_postfix(
             train_loss=f"{train_loss:.4f}",
             balanced_train_acc=f"{train_accuracy:.3f}",
+            train_surrogate=f'{train_surrogate:.4f}',
             val_loss=f"{val_loss:.4f}",
             balanced_val_acc=f"{val_accuracy:.3f}",
+            val_surrogate=f'{val_surrogate:.4f}',
         )
 
         # Early Stopping
@@ -104,4 +116,6 @@ def train_pgd_madry(
         train_accuracies=train_accuracies,
         val_losses=val_losses,
         val_accuracies=val_accuracies,
+        train_surrogates=train_surrogates,
+        val_surrogates=val_surrogates
     )

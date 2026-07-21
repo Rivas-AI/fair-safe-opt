@@ -9,7 +9,7 @@ import pandas as pd
 from fair_safe_opt.evaluation.robustness import evaluation_sweep
 
 
-_TRAINING_STYLE = 'static'
+_TRAINING_STYLE = 'madry'
 
 _CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
 with open(_CONFIG_PATH) as f:
@@ -28,7 +28,7 @@ def main():
         
     Path.mkdir(out_dir, exist_ok=True, parents=True)
     
-    metrics_dict = evaluation_sweep(config['architecture_sweep'], config['epsilon_sweep'], config['seed_sweep'], training_style=_TRAINING_STYLE, model_save_dir=saved_model_loc, training_epsilon=config['training_epsilon'], as_deltas=True)
+    metrics_dict = evaluation_sweep(config['architecture_sweep'], config['epsilon_sweep'], config['seed_sweep'], training_style=_TRAINING_STYLE, model_save_dir=saved_model_loc, training_epsilon=config['training_epsilon'], as_deltas=False)
     
     for name, table in metrics_dict.items():
         print(name)
