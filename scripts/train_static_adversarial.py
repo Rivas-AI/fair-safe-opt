@@ -12,15 +12,14 @@ from fair_safe_opt.training.erm import train_erm
 from fair_safe_opt.utils.seeds import set_seed
 from fair_safe_opt.training.training_history import save_training_history
 from fair_safe_opt.evaluation.plot import plot_history
+from fair_safe_opt.utils.paths import TRAINING_CONFIG_PATH, baseline_run_dir, pgd_training_data_path, static_adversarial_results_dir, static_adversarial_run_dir
 
 from pathlib import Path
 
 _TRAINING_EPS = 0.3
 _NUM_PGD_EXAMPLES = 10
-_CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
-_PGD_DATASET_PATH = Path.cwd() / 'data' / 'pgd_training_data'
-Path.mkdir(_PGD_DATASET_PATH, parents=True, exist_ok=True)
-_OUT_DIR = Path.cwd() / 'results' / 'robustness' / 'adversarial' / 'static'
+_CONFIG_PATH = TRAINING_CONFIG_PATH
+_OUT_DIR = static_adversarial_results_dir()
 Path.mkdir(_OUT_DIR, parents=True, exist_ok=True)
 
 with open(_CONFIG_PATH) as f:
@@ -46,9 +45,10 @@ def make_pgd_dataset(model, split, epsilon, steps, alpha):
     return aggregated_training_features, aggregated_val_features
 
 def run_single(architecture, epsilon, seed):
-    baseline_path = Path(f'trained_models/baseline/{architecture}_eps0.0_{seed}/best_model.pt')
-    pgd_data_path = Path(_PGD_DATASET_PATH / f'{architecture}_eps{epsilon}_seed{seed}.pt')
-    save_dir = Path(f'trained_models/adversarial/static_pgd/{architecture}_eps{epsilon}_{seed}')
+    baseline_path = baseline_run_dir(architecture, seed) / 'best_model.pt'
+    pgd_data_path = pgd_training_data_path(architecture, epsilon, seed)
+    pgd_data_path.parent.mkdir(parents=True, exist_ok=True)
+    save_dir = static_adversarial_run_dir(architecture, epsilon, seed)
     save_dir.mkdir(parents=True, exist_ok=True)
 
     set_seed(seed)
@@ -66,7 +66,7 @@ def run_single(architecture, epsilon, seed):
         steps = config['steps']
         alpha = 2 * (epsilon / steps)
         pgd_train_tensor, pgd_val_tensor = make_pgd_dataset(model, split, epsilon, steps, alpha)
-        torch.save(pgd_train_tensor, _PGD_DATASET_PATH / f'{architecture}_eps{epsilon}_{seed}.pt')
+        torch.save((pgd_train_tensor, pgd_val_tensor), pgd_data_path)
         
     if Path(save_dir / 'best_model.pt').exists():
         print(f"Loading model for {architecture} with epsilon={epsilon} and seed={seed}.")

@@ -13,8 +13,9 @@ from fair_safe_opt.data.adult import load_adult, AdultSplit
 from fair_safe_opt.models.build import build_model
 from fair_safe_opt.training.adversarial import train_pgd_madry
 from fair_safe_opt.training.training_history import save_training_history
+from fair_safe_opt.utils.paths import TRAINING_CONFIG_PATH, madry_adversarial_run_dir
 
-_CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
+_CONFIG_PATH = TRAINING_CONFIG_PATH
 
 with open(_CONFIG_PATH) as f:
     config = yaml.safe_load(f)
@@ -35,7 +36,7 @@ def save_config_snapshot(seed, architecture, hidden_dim, dropout, training_epsil
 
 
 def get_or_train_adversarial(seed: int, architecture: str, training_epsilon: float) -> tuple[torch.nn.Module, AdultSplit]:
-    save_dir = Path(f"trained_models/adversarial/madry_pgd/{architecture}_eps{training_epsilon}_{seed}")
+    save_dir = madry_adversarial_run_dir(architecture, training_epsilon, seed)
     save_dir.mkdir(parents=True, exist_ok=True)
 
     set_seed(seed)

@@ -13,8 +13,9 @@ from fair_safe_opt.data.adult import load_adult, AdultSplit
 from fair_safe_opt.training.training_history import save_training_history
 from fair_safe_opt.models.build import build_model
 from fair_safe_opt.training.erm import train_erm
+from fair_safe_opt.utils.paths import TRAINING_CONFIG_PATH, baseline_run_dir
 
-_CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
+_CONFIG_PATH = TRAINING_CONFIG_PATH
 
 with open(_CONFIG_PATH) as f:
     config = yaml.safe_load(f)
@@ -32,7 +33,7 @@ def save_config_snapshot(seed, architecture, hidden_dim, dropout, outfile):
 
 
 def get_or_train_baseline(seed: int, architecture: str) -> tuple[torch.nn.Module, AdultSplit]:
-    save_dir = Path(f"trained_models/baseline/{architecture}_eps0.0_{seed}")
+    save_dir = baseline_run_dir(architecture, seed)
     save_dir.mkdir(parents=True, exist_ok=True)
 
     set_seed(seed)

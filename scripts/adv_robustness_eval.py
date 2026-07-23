@@ -7,22 +7,23 @@ import yaml
 from pathlib import Path
 import pandas as pd
 from fair_safe_opt.evaluation.robustness import evaluation_sweep
+from fair_safe_opt.utils.paths import (TRAINING_CONFIG_PATH, madry_adversarial_results_dir, madry_adversarial_root,static_adversarial_results_dir, static_adversarial_root)
 
 
 _TRAINING_STYLE = 'madry'
 
-_CONFIG_PATH = Path.cwd() / 'configs' / 'experiments' / 'training_configs.yaml'
+_CONFIG_PATH = TRAINING_CONFIG_PATH
 with open(_CONFIG_PATH) as f:
     config = yaml.safe_load(f)
 
 
 def main():
     if _TRAINING_STYLE == 'static':
-        saved_model_loc = Path('trained_models/adversarial/static_pgd')
-        out_dir = Path('results/robustness/adversarial/static_pgd')
+        saved_model_loc = static_adversarial_root()
+        out_dir = static_adversarial_results_dir()
     elif _TRAINING_STYLE == 'madry':
-        saved_model_loc = Path('trained_models/adversarial/madry_pgd')
-        out_dir = Path('results/robustness/adversarial/madry_pgd')
+        saved_model_loc = madry_adversarial_root()
+        out_dir = madry_adversarial_results_dir()
     else:
         raise ValueError("training style must be static or madry.")
         
