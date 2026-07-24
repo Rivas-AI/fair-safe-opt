@@ -41,6 +41,8 @@ def demographic_parity_difference(
     sensitive: torch.Tensor,
 ) -> float:
     """Hard-label demographic parity difference for two groups.
+    
+    POSITIVE VALUES INDICATE THAT GO HAS THE HIGHER RATE. 
 
     Args:
         y_pred: a tensor representing the predicted labels for all samples.
@@ -56,7 +58,7 @@ def demographic_parity_difference(
     if torch.isnan(r0) or torch.isnan(r1):
         return torch.nan
 
-    return float(torch.abs(r0 - r1).item())
+    return float(r0 - r1)
 
 
 def equal_opportunity_difference(
@@ -77,7 +79,7 @@ def equal_opportunity_difference(
     positives = y_true.float() == 1
     r0 = _rate(y_pred.float(), positives & _as_bool_group(sensitive, 0), "positive group 0")
     r1 = _rate(y_pred.float(), positives & _as_bool_group(sensitive, 1), "positive group 1")
-    return float(torch.abs(r0 - r1).item())
+    return float(r0 - r1)
 
 
 def demographic_parity_surrogate(
