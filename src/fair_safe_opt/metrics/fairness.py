@@ -145,6 +145,24 @@ def balanced_accuracy_by_group(
     return result
 
 
+def PPR_by_group(
+    predictions: torch.Tensor, 
+    sensitive: torch.Tensor
+) -> dict[int, float]:
+    """Positive prediction rate separately for groups 0, 1, and combined."""
+    preds = predictions.float()
+    all_mask = torch.ones_like(sensitive, dtype=torch.bool)
+
+    ppr_combined = _rate(preds, all_mask, "combined group")
+    ppr0 = _rate(preds, _as_bool_group(sensitive, 0), "group 0")
+    ppr1 = _rate(preds, _as_bool_group(sensitive, 1), "group 1")
+
+    return {
+        0: float(ppr0.item()),
+        1: float(ppr1.item()),
+        2: float(ppr_combined.item())
+    }
+
 def TPR_by_group(
     predictions: torch.Tensor,
     y_true: torch.Tensor,

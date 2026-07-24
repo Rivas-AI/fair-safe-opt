@@ -26,6 +26,7 @@ from fair_safe_opt.metrics.fairness import (
     equal_opportunity_difference,
     balanced_accuracy_by_group,
     auc_by_group,
+    PPR_by_group,
     TPR_by_group
 )
 from fair_safe_opt.evaluation.plot import plot_history, plot_roc_confusion
@@ -58,17 +59,21 @@ def create_metric_table(preds: torch.Tensor, probs: torch.Tensor, labels: torch.
     
     per_group_acc = balanced_accuracy_by_group(preds, labels, sensitive)
     per_group_auc = auc_by_group(probs, labels, sensitive)
+    per_group_ppr = PPR_by_group(preds, sensitive)
     per_group_tpr = TPR_by_group(preds, labels, sensitive)
     combined_tpr = per_group_tpr[2]  # True positive rate for the combined groups
+    combined_ppr = per_group_ppr[2]
     # Metrics for group 0
     group0_accuracy = per_group_acc[0]
     group0_auc_score = per_group_auc[0]
     group0_tpr = per_group_tpr[0]
-
+    group0_ppr = per_group_ppr[0]
+    
     # Metrics for group 1
     group1_accuracy = per_group_acc[1]
     group1_auc_score = per_group_auc[1]
     group1_tpr = per_group_tpr[1]
+    group1_ppr = per_group_ppr[1]
 
     df = pd.DataFrame({
         "group": {
@@ -90,6 +95,11 @@ def create_metric_table(preds: torch.Tensor, probs: torch.Tensor, labels: torch.
             "0": group0_tpr,
             "1": group1_tpr,
             "2": combined_tpr,
+        },
+        "positive_pred_rate": {
+            "0": group0_ppr,
+            "1": group1_ppr,
+            "2": combined_ppr,
         },
         "demographic_parity_difference": {
             "0": None,
