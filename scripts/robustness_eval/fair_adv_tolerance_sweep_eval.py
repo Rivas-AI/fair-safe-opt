@@ -27,8 +27,9 @@ def main():
     metrics_dict = tolerance_sweep_evaluation(config['architecture_sweep'], config['epsilon_sweep'], config['seed_sweep'], _TOLERANCE_SWEEP, _FAIRNESS_METRIC, training_style='dp_fair', training_epsilon=config['training_epsilon'], as_deltas=False)
 
     for name, table in metrics_dict.items():
+        table = table.sort_values(['architecture', 'tolerance'])
         print(name)
-        print(table.head(8))
+        print(table.head(20))
         table.to_csv(Path(out_dir / f"{name}.csv"), index=False)
 
 
