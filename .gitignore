@@ -19,9 +19,11 @@ data/cache/
 data/processed/
 results/**
 !results/README.md
-results/runs/
+results/runs/f4
 outputs/
 checkpoints/
+trained_models/**
+data/**
 *.pt
 *.pth
 *.ckpt
