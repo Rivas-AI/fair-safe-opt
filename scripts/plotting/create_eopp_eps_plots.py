@@ -14,7 +14,7 @@ from fair_safe_opt.reporting.robustness_tables import seed_averages_and_stddev
 with open(config_path()) as f:
     config = yaml.safe_load(f)
 
-baseline_table_path = baseline_robustness_dir() / "combined.csv"
+baseline_table_path = baseline_robustness_dir() / "pgd_combined.csv"
 madry_table_path = madry_adversarial_robustness_dir() / "combined.csv"
 
 architectures = config["architecture_sweep"]
@@ -50,8 +50,8 @@ fig.savefig(results_tables_dir() / "eopp_baseline_vs_madry.png", dpi=150, bbox_i
 plt.close(fig)
 
 # Plot group PPRates to see why Madry is lower DPD
-baseline_gp1 = seed_averages_and_stddev(pd.read_csv(baseline_robustness_dir() / "group_1.csv"))
-baseline_gp0 = seed_averages_and_stddev(pd.read_csv(baseline_robustness_dir() / "group_0.csv"))
+baseline_gp1 = seed_averages_and_stddev(pd.read_csv(baseline_robustness_dir() / "pgd_group_1.csv"))
+baseline_gp0 = seed_averages_and_stddev(pd.read_csv(baseline_robustness_dir() / "pgd_group_0.csv"))
 
 madry_gp1 = seed_averages_and_stddev(
     pd.read_csv(madry_adversarial_robustness_dir() / "group_1.csv")
