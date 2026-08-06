@@ -42,7 +42,8 @@ def test_equal_opportunity_difference() -> None:
     y_pred = torch.tensor([1, 0, 1, 1], dtype=torch.float32)
     sensitive = torch.tensor([0, 0, 1, 1], dtype=torch.float32)
 
-    assert equal_opportunity_difference(y_true, y_pred, sensitive) == 0.5
+    # Signed, group0 - group1: TPR0 = 0.5, TPR1 = 1.0, so the difference is -0.5.
+    assert equal_opportunity_difference(y_true, y_pred, sensitive) == -0.5
 
 
 def test_surrogates_are_squared_probability_gaps() -> None:

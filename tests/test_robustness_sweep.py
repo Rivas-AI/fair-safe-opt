@@ -198,8 +198,13 @@ def test_each_tolerance_writes_its_own_attack_cache(monkeypatch, tmp_path) -> No
 
     cache_files = sorted(path.name for path in (tmp_path / "pgd_data").iterdir())
     assert len(cache_files) == len(_TOLERANCES) * len(_ARCHITECTURES) * len(_EPSILONS) * len(_SEEDS)
+    # Filenames are hashes of the cache key, so match on the name the key produces
+    # rather than a readable tau substring.
     for tolerance in _TOLERANCES:
-        assert any(f"tau{tolerance}_" in name for name in cache_files)
+        expected = pgd_cache_path(
+            _TRAINING_STYLE, _ARCHITECTURES[0], _SEEDS[0], _EPSILONS[0], tolerance
+        ).name
+        assert expected in cache_files
 
 
 def test_tolerance_sweep_does_not_read_old_style_cache(monkeypatch, tmp_path) -> None:

@@ -28,7 +28,8 @@ def test_logistic_smoke_training_runs() -> None:
     assert len(history.train_losses) == 2
     assert len(history.train_accuracies) == 2
     assert 0.0 <= metrics["balanced_accuracy"] <= 1.0
-    assert 0.0 <= metrics["demographic_parity_difference"] <= 1.0
+    # Demographic parity difference is signed (group0 - group1), so it spans [-1, 1].
+    assert -1.0 <= metrics["demographic_parity_difference"] <= 1.0
 
 
 def test_mlp_forward_shape() -> None:

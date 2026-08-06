@@ -17,6 +17,7 @@ def test_create_metric_table_index_and_columns() -> None:
         "balanced_accuracy",
         "auc",
         "advantaged_tpr",
+        "positive_pred_rate",
         "demographic_parity_difference",
         "equal_opportunity_difference",
     ]
