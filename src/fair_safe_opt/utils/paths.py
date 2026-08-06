@@ -9,6 +9,7 @@ repository root rather than the working directory, so importing this module has 
 side effects and does not depend on where the interpreter was started.
 """
 
+import hashlib
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -110,13 +111,14 @@ def pgd_cache_path(
     model gets evaluated against another model's adversarial examples. Tolerance is
     absent for training styles that have no tau (baseline, static, madry); caches
     written before the key carried a tau are a distinct filename and are never read.
+
+    The key below still names every axis; the filename on disk is its SHA-256 hash,
+    so distinct keys map to distinct (fixed-length, float-safe) filenames.
     """
     tolerance_key = "" if tolerance is None else f"tau{tolerance}_"
-    return (
-        DATA_ROOT
-        / "pgd_testing_data"
-        / f"{training_style}_{tolerance_key}{architecture}_{seed}_{epsilon}"
-    )
+    key = f"{training_style}_{tolerance_key}{architecture}_{seed}_{epsilon}"
+    filename = hashlib.sha256(key.encode()).hexdigest()
+    return DATA_ROOT / "pgd_testing_data" / filename
 
 
 def pgd_training_data_path(architecture: str, training_epsilon: float, seed: int) -> Path:
