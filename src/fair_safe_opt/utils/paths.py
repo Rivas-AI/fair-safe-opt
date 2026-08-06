@@ -12,10 +12,12 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 MODELS_ROOT = PROJECT_ROOT / 'trained_models'
-RESULTS_ROOT = PROJECT_ROOT / 'results' / 'robustness'
+RESULTS_ROOT = PROJECT_ROOT / 'results' 
 DATA_ROOT = PROJECT_ROOT / 'data'
 TRAINING_CONFIG_PATH = PROJECT_ROOT / 'configs' / 'experiments' / 'training_configs.yaml'
 
+def config_path():
+    return TRAINING_CONFIG_PATH
 
 def run_dir_name(architecture: str, training_epsilon: float, seed: int) -> str:
     '''Leaf directory name for one trained model. Shared by every training style.'''
@@ -62,24 +64,24 @@ def fair_adversarial_run_dir(metric: str, tolerance: float, architecture: str, t
 
 # --- results trees: mirror the checkpoint trees above ---
 
-def baseline_results_dir() -> Path:
-    return RESULTS_ROOT / 'baseline'
+def baseline_robustness_dir() -> Path:
+    return RESULTS_ROOT / 'robustness' / 'baseline'
 
 
-def static_adversarial_results_dir() -> Path:
-    return RESULTS_ROOT / 'adversarial' / 'static_pgd'
+def static_adversarial_robustness_dir() -> Path:
+    return RESULTS_ROOT / 'robustness' / 'adversarial' / 'static_pgd'
 
 
-def madry_adversarial_results_dir() -> Path:
-    return RESULTS_ROOT / 'adversarial' / 'madry_pgd'
+def madry_adversarial_robustness_dir() -> Path:
+    return RESULTS_ROOT / 'robustness' / 'adversarial' / 'madry_pgd'
 
 
-def fair_adversarial_results_dir(metric: str) -> Path:
-    return RESULTS_ROOT / 'fair_adversarial' / metric
+def fair_adversarial_robustness_dir(metric: str) -> Path:
+    return RESULTS_ROOT / 'robustness' / 'fair_adversarial' / metric
 
 
 def fair_adversarial_sweep_results_dir(metric: str) -> Path:
-    return fair_adversarial_results_dir(metric) / 'tau_sweep'
+    return fair_adversarial_robustness_dir(metric) / 'tau_sweep'
 
 
 # --- generated datasets ---
@@ -100,3 +102,10 @@ def pgd_cache_path(training_style: str, architecture: str, seed: int, epsilon: f
 def pgd_training_data_path(architecture: str, training_epsilon: float, seed: int) -> Path:
     '''Pre-generated PGD training set consumed by scripts/train_static_adversarial.py.'''
     return DATA_ROOT / 'pgd_training_data' / f'{architecture}_eps{training_epsilon}_{seed}.pt'
+
+def fgsm_cache_path(training_style: str, architecture: str, training_epsilon: float, seed: int) -> Path:
+    return DATA_ROOT / 'fgsm_training_data' / f'{training_style}_{architecture}_eps{training_epsilon}_{seed}.pt'
+# ----------------------------------
+
+def results_tables_dir():
+    return RESULTS_ROOT / 'tables'
