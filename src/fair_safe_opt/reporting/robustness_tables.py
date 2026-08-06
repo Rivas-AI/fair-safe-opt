@@ -5,8 +5,26 @@ def decimals_to_scores(v: float) -> float:
     return float(f"{v * 100:.2f}")
 
 
-def average_over_seeds(df: pd.DataFrame) -> pd.DataFrame:
-    return df.groupby(['architecture', 'epsilon', 'group']).mean().reset_index().drop('seed', axis=1)
+def seed_averages_and_stddev(df: pd.DataFrame) -> pd.DataFrame:
+    keys = ['architecture', 'epsilon']
+    metrics = [c for c in df.columns if c not in keys + ['seed']]
+
+    grouped = df.groupby(keys)[metrics].agg(['mean', 'std'])
+
+    # interleave: metric, metric_std, next_metric, next_metric_std, ...
+    ordered = []
+    for m in metrics:
+        ordered.append((m, 'mean'))
+        ordered.append((m, 'std'))
+    grouped = grouped[ordered]
+
+    # flatten MultiIndex columns: ('eopp','mean')->'eopp', ('eopp','std')->'eopp_std'
+    grouped.columns = [
+        metric if stat == 'mean' else f'{metric}_std'
+        for metric, stat in grouped.columns
+    ]
+
+    return grouped.reset_index()
 
 
 def to_scores(df: pd.DataFrame) -> pd.DataFrame:
