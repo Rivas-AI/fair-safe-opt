@@ -10,5 +10,5 @@ def build_model(architecture: str, split: AdultSplit, hidden_dim: int, dropout: 
         model = SmallMLP(split.x_train.shape[1], hidden_dim=hidden_dim, dropout=dropout)
     else:
         raise ValueError("architecture not in {'logistic', 'small_mlp'}")
-    
+
     return model

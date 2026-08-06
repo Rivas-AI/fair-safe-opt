@@ -41,8 +41,8 @@ def demographic_parity_difference(
     sensitive: torch.Tensor,
 ) -> float:
     """Hard-label demographic parity difference for two groups.
-    
-    POSITIVE VALUES INDICATE THAT GO HAS THE HIGHER RATE. 
+
+    POSITIVE VALUES INDICATE THAT GO HAS THE HIGHER RATE.
 
     Args:
         y_pred: a tensor representing the predicted labels for all samples.
@@ -127,7 +127,8 @@ def auc_by_group(
         else:
             result[group] = float(roc_auc_score(y_true[mask].numpy(), probs[mask].numpy()))
     return result
-    
+
+
 def balanced_accuracy_by_group(
     predictions: torch.Tensor,
     y_true: torch.Tensor,
@@ -141,14 +142,13 @@ def balanced_accuracy_by_group(
             warnings.warn(f"No samples for group {group}; returning nan.", RuntimeWarning)
             result[group] = float("nan")
         else:
-            result[group] = float(balanced_accuracy_score(y_true[mask].numpy(), predictions[mask].numpy()))
+            result[group] = float(
+                balanced_accuracy_score(y_true[mask].numpy(), predictions[mask].numpy())
+            )
     return result
 
 
-def PPR_by_group(
-    predictions: torch.Tensor, 
-    sensitive: torch.Tensor
-) -> dict[int, float]:
+def PPR_by_group(predictions: torch.Tensor, sensitive: torch.Tensor) -> dict[int, float]:
     """Positive prediction rate separately for groups 0, 1, and combined."""
     preds = predictions.float()
     all_mask = torch.ones_like(sensitive, dtype=torch.bool)
@@ -157,11 +157,8 @@ def PPR_by_group(
     ppr0 = _rate(preds, _as_bool_group(sensitive, 0), "group 0")
     ppr1 = _rate(preds, _as_bool_group(sensitive, 1), "group 1")
 
-    return {
-        0: float(ppr0.item()),
-        1: float(ppr1.item()),
-        2: float(ppr_combined.item())
-    }
+    return {0: float(ppr0.item()), 1: float(ppr1.item()), 2: float(ppr_combined.item())}
+
 
 def TPR_by_group(
     predictions: torch.Tensor,
@@ -175,8 +172,4 @@ def TPR_by_group(
     tpr0 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 0), "positive group 0")
     tpr1 = _rate(predictions.float(), positives & _as_bool_group(sensitive, 1), "positive group 1")
 
-    return {
-        0: float(tpr0.item()),
-        1: float(tpr1.item()),
-        2: float(tpr_combined.item())
-    }
+    return {0: float(tpr0.item()), 1: float(tpr1.item()), 2: float(tpr_combined.item())}

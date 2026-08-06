@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 
 import torch
 from torch import nn
@@ -26,9 +25,9 @@ def train_erm(
     learning_rate: float = 1e-2,
     patience: int = 5,
 ) -> TrainingHistory:
-    '''
+    """
     Train a model using Empirical Risk Minimization (ERM) with early stopping.
-    '''
+    """
     # Define training variables
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)

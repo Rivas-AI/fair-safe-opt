@@ -1,5 +1,6 @@
 import torch
 
+
 def set_device(device):
     """
     Sets device used for training. Heirarchy goes CUDA, MPS, then CPU if none are available.
@@ -7,10 +8,10 @@ def set_device(device):
     - (torch.device): device to be used.
     """
     if device is not None:
-        try: 
+        try:
             return torch.device(device)
-        except ValueError as e:
-            raise ValueError(f'Invalid device {device}. Use cpu, mps, or cuda.')
+        except ValueError:
+            raise ValueError(f"Invalid device {device}. Use cpu, mps, or cuda.")
     else:
         if torch.cuda.is_available():
             return torch.device("cuda")

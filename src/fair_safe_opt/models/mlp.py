@@ -22,7 +22,7 @@ class SmallMLP(nn.Module):
         if x.shape[1] != self.net[0].in_features:
             raise ValueError("Input feature dimension mismatch.")
         return self.net(x).squeeze(-1)
-    
+
     def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
         with torch.no_grad():
             logits = self.forward(x)

@@ -46,7 +46,7 @@ def test_predictions(monkeypatch) -> None:
     adult_split: AdultSplit = load_adult()
 
     model = SmallMLP(input_dim=adult_split.x_train.shape[1])
-    preds, probs = model.preds_probs(torch.tensor(adult_split.x_test))
+    preds, probs = model.preds_probs(adult_split.x_test)
     assert preds.shape == adult_split.y_test.shape
     assert probs.shape == adult_split.y_test.shape
     assert set(preds.tolist()).issubset({0.0, 1.0})
@@ -60,10 +60,10 @@ def test_training(monkeypatch) -> None:
     model = SmallMLP(input_dim=adult_split.x_train.shape[1])
     history = train_erm(
         model,
-        torch.tensor(adult_split.x_train),
-        torch.tensor(adult_split.y_train),
-        torch.tensor(adult_split.x_val),
-        torch.tensor(adult_split.y_val),
+        adult_split.x_train,
+        adult_split.y_train,
+        adult_split.x_val,
+        adult_split.y_val,
         epochs=2,
     )
     assert len(history.train_losses) == 2
@@ -87,10 +87,10 @@ def test_training_updates_weights(monkeypatch) -> None:
 
     train_erm(
         model,
-        torch.tensor(adult_split.x_train),
-        torch.tensor(adult_split.y_train),
-        torch.tensor(adult_split.x_val),
-        torch.tensor(adult_split.y_val),
+        adult_split.x_train,
+        adult_split.y_train,
+        adult_split.x_val,
+        adult_split.y_val,
         epochs=2,
     )
 

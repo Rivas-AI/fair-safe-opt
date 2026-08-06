@@ -20,7 +20,7 @@ def train_pgd_madry(
     a_train: torch.Tensor,
     x_val: torch.Tensor,
     y_val: torch.Tensor,
-    a_val: torch.Tensor, 
+    a_val: torch.Tensor,
     continuous_mask: torch.Tensor,
     *,
     out_dir: Path | None = None,
@@ -31,12 +31,12 @@ def train_pgd_madry(
     alpha: float = 0.01,
     steps: int = 10,
     patience: int = 5,
-    fairness_metric: str = 'dp'
+    fairness_metric: str = "dp",
 ) -> TrainingHistory:
-    '''
+    """
     Train a model using adversarial training with PGD attacks and early stopping.
-    '''
-    
+    """
+
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
     train_losses: list[float] = []
@@ -54,19 +54,43 @@ def train_pgd_madry(
     for _ in progress:
         model.train()
         epoch_losses = []
-        
+
         # Iterate through the training data in batches
         for xb, yb in loader:
-            adv_xb = pgd_attack(model, xb, yb, epsilon=epsilon, alpha=alpha, steps=steps, continuous_mask=continuous_mask)
+            adv_xb = pgd_attack(
+                model,
+                xb,
+                yb,
+                epsilon=epsilon,
+                alpha=alpha,
+                steps=steps,
+                continuous_mask=continuous_mask,
+            )
             optimizer.zero_grad(set_to_none=True)
             loss = nn.functional.binary_cross_entropy_with_logits(model(adv_xb), yb.float())
             loss.backward()
             optimizer.step()
             epoch_losses.append(float(loss.item()))
         model.eval()
-        
-        x_train_adv = pgd_attack(model, x_train, y_train, epsilon=epsilon, alpha=alpha, steps=steps, continuous_mask=continuous_mask)
-        x_val_adv = pgd_attack(model, x_val, y_val, epsilon=epsilon, alpha=alpha, steps=steps, continuous_mask=continuous_mask)
+
+        x_train_adv = pgd_attack(
+            model,
+            x_train,
+            y_train,
+            epsilon=epsilon,
+            alpha=alpha,
+            steps=steps,
+            continuous_mask=continuous_mask,
+        )
+        x_val_adv = pgd_attack(
+            model,
+            x_val,
+            y_val,
+            epsilon=epsilon,
+            alpha=alpha,
+            steps=steps,
+            continuous_mask=continuous_mask,
+        )
         with torch.no_grad():
             logits_train = model(x_train_adv)
             logits_val = model(x_val_adv)
@@ -91,10 +115,10 @@ def train_pgd_madry(
         progress.set_postfix(
             train_loss=f"{train_loss:.4f}",
             balanced_train_acc=f"{train_accuracy:.3f}",
-            train_surrogate=f'{train_surrogate:.4f}',
+            train_surrogate=f"{train_surrogate:.4f}",
             val_loss=f"{val_loss:.4f}",
             balanced_val_acc=f"{val_accuracy:.3f}",
-            val_surrogate=f'{val_surrogate:.4f}',
+            val_surrogate=f"{val_surrogate:.4f}",
         )
 
         # Early Stopping
@@ -117,5 +141,5 @@ def train_pgd_madry(
         val_losses=val_losses,
         val_accuracies=val_accuracies,
         train_surrogates=train_surrogates,
-        val_surrogates=val_surrogates
+        val_surrogates=val_surrogates,
     )

@@ -11,11 +11,12 @@ def test_create_metric_table_index_and_columns() -> None:
 
     table = create_metric_table(preds, probs, labels, sensitive)
 
-    assert list(table.index) == ["group_0", "group_1", "combined"]
+    assert list(table["group"]) == ["group_0", "group_1", "combined"]
     assert list(table.columns) == [
+        "group",
         "balanced_accuracy",
         "auc",
-        "advantaged tpr",
+        "advantaged_tpr",
         "demographic_parity_difference",
         "equal_opportunity_difference",
     ]
@@ -28,7 +29,7 @@ def test_create_metric_table_group_values_consistent_with_combined() -> None:
     labels = torch.tensor([1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0])
     sensitive = torch.tensor([0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0])
 
-    table = create_metric_table(preds, probs, labels, sensitive)
+    table = create_metric_table(preds, probs, labels, sensitive).set_index("group")
 
     assert table.loc["group_0", "balanced_accuracy"] == 1.0
     assert table.loc["group_1", "balanced_accuracy"] == 0.0

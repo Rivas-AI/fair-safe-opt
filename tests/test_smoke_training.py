@@ -4,7 +4,7 @@ from fair_safe_opt.data.synthetic import make_synthetic_tabular
 from fair_safe_opt.evaluation import evaluate_binary_classifier
 from fair_safe_opt.models import LogisticRegression, SmallMLP
 from fair_safe_opt.training import train_erm
-from fair_safe_opt.training.adversarial import train_pgd_adversarial
+from fair_safe_opt.training.adversarial import train_pgd_madry
 from fair_safe_opt.utils import set_seed
 
 
@@ -45,12 +45,14 @@ def test_adversarial_smoke_training_runs() -> None:
     dataset = make_synthetic_tabular(n_samples=32, seed=21)
     model = LogisticRegression(dataset.x.shape[1])
 
-    history = train_pgd_adversarial(
+    history = train_pgd_madry(
         model,
         dataset.x,
         dataset.y,
+        dataset.sensitive_train,
         dataset.x_val,
         dataset.y_val,
+        dataset.sensitive_val,
         dataset.continuous_mask,
         epochs=2,
         batch_size=16,
@@ -68,3 +70,10 @@ def test_adversarial_smoke_training_runs() -> None:
     assert all(torch.isfinite(torch.tensor(history.val_losses)))
     assert all(0.0 <= acc <= 1.0 for acc in history.train_accuracies)
     assert all(0.0 <= acc <= 1.0 for acc in history.val_accuracies)
+
+    # Madry training tracks the fairness surrogate; these are the fields whose
+    # arrival broke the call above.
+    assert len(history.train_surrogates) == 2
+    assert len(history.val_surrogates) == 2
+    assert all(torch.isfinite(torch.tensor(history.train_surrogates)))
+    assert all(torch.isfinite(torch.tensor(history.val_surrogates)))

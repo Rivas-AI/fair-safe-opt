@@ -19,8 +19,8 @@ class LogisticRegression(nn.Module):
     def preds_probs(self, x: torch.Tensor, threshold: float = 0.5):
         with torch.no_grad():
             logits = self.forward(x)
-        
+
         probs = torch.sigmoid(logits)
         preds = (probs >= threshold).float()
-        
+
         return preds, probs

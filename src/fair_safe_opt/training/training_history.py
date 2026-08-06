@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 import json
 from dataclasses import asdict
 
+
 @dataclass(frozen=True)
 class TrainingHistory:
     train_losses: list[float] = field(default_factory=list)

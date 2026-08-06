@@ -1,4 +1,4 @@
-'''
+"""
 dataset_summary.py
 ----------------------------------
 Compute the numbers for the Adult dataset-summary table in the paper.
@@ -14,7 +14,8 @@ re-read of the same source load_adult pulls from, not a re-implementation of the
 preprocessing.
 
 Output is plain text. Percentages are printed to 1 decimal, rates to 3 decimals.
-'''
+"""
+
 from __future__ import annotations
 
 import numpy as np
@@ -34,12 +35,12 @@ _SENSITIVE_COL = "sex"
 
 
 def _combine(*tensors: torch.Tensor) -> np.ndarray:
-    '''Concatenate split tensors back into the full-dataset array as int.'''
+    """Concatenate split tensors back into the full-dataset array as int."""
     return torch.cat(tensors).round().to(torch.int64).numpy()
 
 
 def group_summary(a: np.ndarray, y: np.ndarray) -> None:
-    '''Per-group n, share of total, Pr{Y=1}, and count of Y=1 for the full set.'''
+    """Per-group n, share of total, Pr{Y=1}, and count of Y=1 for the full set."""
     total = a.shape[0]
     groups = [
         ("G0 (a==0, male)  ", a == 0),
@@ -58,7 +59,7 @@ def group_summary(a: np.ndarray, y: np.ndarray) -> None:
 
 
 def cell_counts(a: np.ndarray, y: np.ndarray) -> None:
-    '''The four (A, Y) joint cell counts.'''
+    """The four (A, Y) joint cell counts."""
     print("(A, Y) cell counts")
     for a_val in (0, 1):
         for y_val in (0, 1):
@@ -67,7 +68,7 @@ def cell_counts(a: np.ndarray, y: np.ndarray) -> None:
 
 
 def split_sizes(split: AdultSplit) -> None:
-    '''Train/val/test sizes and the stratification variable.'''
+    """Train/val/test sizes and the stratification variable."""
     n_train = split.y_train.shape[0]
     n_val = split.y_val.shape[0]
     n_test = split.y_test.shape[0]
@@ -76,12 +77,14 @@ def split_sizes(split: AdultSplit) -> None:
     print(f"  train: {n_train} ({100.0 * n_train / total:.1f}%)")
     print(f"  val:   {n_val} ({100.0 * n_val / total:.1f}%)")
     print(f"  test:  {n_test} ({100.0 * n_test / total:.1f}%)")
-    print("  stratified on: Y (the class label), at both the "
-          "train+val/test and train/val split stages")
+    print(
+        "  stratified on: Y (the class label), at both the "
+        "train+val/test and train/val split stages"
+    )
 
 
 def feature_report(split: AdultSplit, n_raw_features: int) -> None:
-    '''Feature counts before/after one-hot, and whether fnlwgt is a feature.'''
+    """Feature counts before/after one-hot, and whether fnlwgt is a feature."""
     n_after = len(split.feature_names)
     has_fnlwgt = "fnlwgt" in split.feature_names
     print("Features")
@@ -93,12 +96,12 @@ def feature_report(split: AdultSplit, n_raw_features: int) -> None:
 def missing_and_raw_features(
     data_id: int, target_col: str, sensitive_col: str, include_sensitive_feature: bool
 ) -> int:
-    '''Report rows dropped for missing values and return the pre-one-hot feature count.
+    """Report rows dropped for missing values and return the pre-one-hot feature count.
 
     Mirrors load_adult's scope: it calls frame.dropna() over the whole frame, and
     (with include_sensitive_feature False) feeds every column except the target and
     the sensitive attribute into the encoder. Returns that raw feature-column count.
-    '''
+    """
     frame = fetch_openml(data_id=data_id, as_frame=True).frame
     n_before = len(frame)
     per_col = frame.isna().sum()
@@ -122,10 +125,8 @@ def missing_and_raw_features(
     return len([c for c in frame.columns if c not in drop_cols])
 
 
-def summarize(
-    seed: int, data_id: int, target_col: str, sensitive_col: str
-) -> None:
-    '''Run every section using plain values only.'''
+def summarize(seed: int, data_id: int, target_col: str, sensitive_col: str) -> None:
+    """Run every section using plain values only."""
     # Full-dataset group/cell/rate numbers are invariant to the split seed (the
     # split only partitions the same rows); the seed just fixes a concrete split.
     split = load_adult(random_state=seed)

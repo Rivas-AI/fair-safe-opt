@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from fair_safe_opt.training.erm import TrainingHistory
-from fair_safe_opt.reporting.robustness_tables import seed_averages_and_stddev
+
 
 def plot_roc_confusion(
     preds: torch.Tensor,
@@ -46,6 +46,7 @@ def plot_history(history: TrainingHistory, out_dir: Path) -> str:
     plt.close(fig)
     return filename
 
+
 def line_plot(
     x: pd.Series,
     y: pd.Series,
@@ -74,27 +75,25 @@ def metric_vs_eps_plot(
     metric: str,
     axes,
 ) -> None:
-    '''Overlay one line per regime, one panel per architecture, onto `axes`.
+    """Overlay one line per regime, one panel per architecture, onto `axes`.
 
     dfs: {label -> averaged df with stddevs}, e.g. {"Baseline": base, "Madry": madry}.
     axes: 1D array of Axes, one per architecture, from the caller.
-    '''
+    """
     # architectures taken from the first df; assumes all dfs share them
-    architectures = next(iter(dfs.values()))['architecture'].unique()
+    architectures = next(iter(dfs.values()))["architecture"].unique()
 
     for ax, architecture in zip(axes, architectures):
         for label, df in dfs.items():
-            sub = df[df['architecture'] == architecture].sort_values('epsilon')
+            sub = df[df["architecture"] == architecture].sort_values("epsilon")
             line_plot(
-                sub['epsilon'],
+                sub["epsilon"],
                 sub[metric],
                 ax,
-                stddev=sub[f'{metric}_std'],
+                stddev=sub[f"{metric}_std"],
                 label=label,
                 title=architecture,
                 xlabel="ε",
                 ylabel=metric,
             )
         ax.legend()
-
-

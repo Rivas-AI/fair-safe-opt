@@ -29,7 +29,9 @@ def print_adult_properties(split: AdultSplit):
     print(
         f" - # Sensitive Group 0 (male): {train[male_mask].shape[0]}  (~{int(train[male_mask].shape[0] / train.shape[0] * 100)}%)"
     )
-    print(f"     - Advantaged Samples: {(split.y_train[male_mask] == 1).float().sum()}{(split.y_train[male_mask] == 1).float().mean()}")
+    print(
+        f"     - Advantaged Samples: {(split.y_train[male_mask] == 1).float().sum()}{(split.y_train[male_mask] == 1).float().mean()}"
+    )
     print(
         f" - # Sensitive Group 1 (female): {train[female_mask].shape[0]}  (~{int(train[female_mask].shape[0] / train.shape[0] * 100)}%)"
     )

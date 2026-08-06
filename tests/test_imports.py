@@ -1,6 +1,5 @@
 import fair_safe_opt
 import pandas as pd
-import numpy as np
 import torch
 from fair_safe_opt.data.adult import load_adult
 from sklearn.utils import Bunch
@@ -149,7 +148,9 @@ def test_adult_columns(monkeypatch) -> None:
     adult = load_adult()
 
     assert adult.x_train.shape[1] == len(adult.feature_names)
-    assert adult.x_train.shape[1] >= int(adult.continuous_mask.sum()) + 18  # 2*9 categorical columns
+    assert (
+        adult.x_train.shape[1] >= int(adult.continuous_mask.sum()) + 18
+    )  # 2*9 categorical columns
     assert "sex" not in adult.feature_names
     assert "class" not in adult.feature_names
 

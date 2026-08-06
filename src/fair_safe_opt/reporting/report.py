@@ -3,17 +3,17 @@ from pathlib import Path
 
 
 def create_report(
-    architecture: str, 
-    method: str, 
-    seed: int, 
-    epochs: int, 
-    patience: int, 
+    architecture: str,
+    method: str,
+    seed: int,
+    epochs: int,
+    patience: int,
     hidden_dim: int,
-    dropout: float, 
+    dropout: float,
     learning_rate: float,
-    eval: Evaluation, 
+    eval: Evaluation,
     out_dir: Path,
-    attack_method: str = 'none',
+    attack_method: str = "none",
     eps: float | None = None,
 ) -> None:
     output_file = out_dir / "report.md"
