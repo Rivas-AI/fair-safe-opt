@@ -10,7 +10,7 @@ from fair_safe_opt.utils.paths import (
 )
 from fair_safe_opt.reporting.robustness_tables import seed_averages_and_stddev
 
-EPSILON = 0.0
+EPSILON = 0.3
 X_METRIC = 'demographic_parity_difference'
 Y_METRIC = 'balanced_accuracy'
 
@@ -76,7 +76,7 @@ def frontier_plot(fair_df, madry_df, architectures, axes):
             color='crimson',
             capsize=3,
             linestyle='none',
-            label='Madry (unconstrained)',
+            label='Adversarial (unconstrained)',
         )
 
         ax.set_title(architecture)
@@ -105,7 +105,13 @@ def main():
     frontier_plot(fair_df, madry_df, architectures, axes)
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center left', bbox_to_anchor=(1.0, 0.5))
+    fig.legend(
+        handles,
+        labels,
+        loc='center left',
+        bbox_to_anchor=(1.02, 0.5),
+        bbox_transform=axes[-1].transAxes,
+    )
 
     save_path = results_tables_dir() / f"act3_frontier_eps{EPSILON}.png"
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
