@@ -11,8 +11,8 @@ from fair_safe_opt.utils.paths import (
 from fair_safe_opt.reporting.robustness_tables import seed_averages_and_stddev
 
 EPSILON = 0.3
-X_METRIC = 'demographic_parity_difference'
-Y_METRIC = 'balanced_accuracy'
+X_METRIC = "equal_opportunity_difference"
+Y_METRIC = "balanced_accuracy"
 
 
 def fair_adv_frontier(table_path, epsilon):
@@ -25,11 +25,11 @@ def fair_adv_frontier(table_path, epsilon):
     df = pd.read_csv(table_path)
 
     frames = []
-    for tau in sorted(df['tolerance'].unique()):
-        sub = df[df['tolerance'] == tau].drop(columns=['tolerance'])
+    for tau in sorted(df["tolerance"].unique()):
+        sub = df[df["tolerance"] == tau].drop(columns=["tolerance"])
         sub = seed_averages_and_stddev(sub)
-        sub = sub[sub['epsilon'] == epsilon].copy()
-        sub['tolerance'] = tau
+        sub = sub[sub["epsilon"] == epsilon].copy()
+        sub["tolerance"] = tau
         frames.append(sub)
 
     return pd.concat(frames, ignore_index=True)
@@ -39,59 +39,61 @@ def madry_anchor(table_path, epsilon):
     """Single seed-averaged point per architecture at the given epsilon."""
     df = pd.read_csv(table_path)
     df = seed_averages_and_stddev(df)
-    return df[df['epsilon'] == epsilon].copy()
+    return df[df["epsilon"] == epsilon].copy()
 
 
 def frontier_plot(fair_df, madry_df, architectures, axes):
     """Fairness-accuracy frontier, one panel per architecture, onto `axes`."""
     for ax, architecture in zip(axes, architectures):
-        fair = fair_df[fair_df['architecture'] == architecture].sort_values('tolerance')
+        fair = fair_df[fair_df["architecture"] == architecture].sort_values("tolerance")
         ax.errorbar(
             fair[X_METRIC],
             fair[Y_METRIC],
             xerr=fair[f"{X_METRIC}_std"],
             yerr=fair[f"{Y_METRIC}_std"],
-            marker='o',
+            marker="o",
             capsize=3,
-            label='fair-adv frontier',
+            label="Fairness-Accuracy Frontier",
         )
         for _, row in fair.iterrows():
             ax.annotate(
                 f"τ={row['tolerance']}",
                 (row[X_METRIC], row[Y_METRIC]),
-                textcoords='offset points',
+                textcoords="offset points",
                 xytext=(6, -6),
-                ha='left',
-                va='top',
+                ha="left",
+                va="top",
                 fontsize=8,
             )
 
-        madry = madry_df[madry_df['architecture'] == architecture]
+        madry = madry_df[madry_df["architecture"] == architecture]
         ax.errorbar(
             madry[X_METRIC],
             madry[Y_METRIC],
             xerr=madry[f"{X_METRIC}_std"],
             yerr=madry[f"{Y_METRIC}_std"],
-            marker='D',
-            color='crimson',
+            marker="D",
+            color="crimson",
             capsize=3,
-            linestyle='none',
-            label='Adversarial (unconstrained)',
+            linestyle="none",
+            label="Adversarial (unconstrained)",
         )
 
-        ax.set_title(architecture)
-        ax.set_xlabel(X_METRIC)
+        ax.axvline(0, color="gray", linestyle="--", linewidth=1)
 
-    axes[0].set_ylabel(Y_METRIC)
+        ax.set_title(architecture)
+        ax.set_xlabel("Equal Opportunity Difference")
+
+    axes[0].set_ylabel("Balanced Accuracy")
 
 
 def main():
     with open(config_path()) as f:
         config = yaml.safe_load(f)
 
-    architectures = config['architecture_sweep']
+    architectures = config["architecture_sweep"]
     fair_adv_table_path = (
-        fair_adversarial_sweep_results_dir(config['fairness_metric']) / "combined.csv"
+        fair_adversarial_sweep_results_dir(config["fairness_metric"]) / "combined.csv"
     )
     madry_table_path = madry_adversarial_robustness_dir() / "combined.csv"
 
@@ -108,14 +110,14 @@ def main():
     fig.legend(
         handles,
         labels,
-        loc='center left',
+        loc="center left",
         bbox_to_anchor=(1.02, 0.5),
         bbox_transform=axes[-1].transAxes,
     )
 
-    save_path = results_tables_dir() / f"act3_frontier_eps{EPSILON}.png"
+    save_path = results_tables_dir() / f"act3_eopp_frontier_eps{EPSILON}.png"
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

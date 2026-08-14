@@ -8,7 +8,12 @@ from fair_safe_opt.evaluation.evaluate import create_metric_table
 from fair_safe_opt.metrics.attacks import attack_success_by_group
 from fair_safe_opt.attacks.pgd import pgd_attack
 from fair_safe_opt.attacks.fgsm import fgsm_attack
-from fair_safe_opt.reporting.robustness_tables import split_by_group
+from fair_safe_opt.reporting.robustness_tables import (
+    seed_averages_and_stddev,
+    split_by_group,
+    to_scores,
+    values_as_deltas,
+)
 from fair_safe_opt.models.build import build_model
 from fair_safe_opt.utils.seeds import set_seed
 from fair_safe_opt.utils.paths import (
@@ -100,7 +105,6 @@ def evaluation_sweep(
     model_save_dir: Path,
     training_epsilon: float = 0.0,
     tolerance: float | None = None,
-    as_deltas: bool = False,
 ):
     """
     Sweeps across all parameters, creating a table with all metrics for all data and returning it divided by group.
@@ -148,12 +152,40 @@ def evaluation_sweep(
                 )
                 full_df = pd.concat([full_df, results_df], axis=0)
 
-    """averaged_df = seed_averages_and_stddev(full_df)
-    if as_deltas:
-        averaged_df = values_as_deltas(averaged_df)"""
+    return split_by_group(full_df)
 
-    group_tables = split_by_group(full_df)
-    return group_tables
+
+def summarize_evaluation_sweep(
+    raw_tables: dict[str, pd.DataFrame], *, as_deltas: bool = False
+) -> dict[str, pd.DataFrame]:
+    """Summarize raw per-seed evaluation tables without changing their persisted schema.
+
+    Each group is averaged over seeds, converted from decimal metrics to
+    percentage-point scores, and optionally expressed as deltas from the
+    architecture's epsilon-zero row. Tolerance sweeps are summarized separately
+    per tolerance so distinct fairness constraints are never averaged together.
+    """
+
+    def summarize_table(table: pd.DataFrame) -> pd.DataFrame:
+        summarized = to_scores(seed_averages_and_stddev(table))
+        return values_as_deltas(summarized) if as_deltas else summarized
+
+    summarized_tables = {}
+    for name, table in raw_tables.items():
+        if "tolerance" not in table.columns:
+            summarized_tables[name] = summarize_table(table)
+            continue
+
+        tolerance_frames = []
+        for tolerance in sorted(table["tolerance"].unique()):
+            frame = summarize_table(
+                table[table["tolerance"] == tolerance].drop(columns="tolerance")
+            )
+            frame.insert(0, "tolerance", tolerance)
+            tolerance_frames.append(frame)
+        summarized_tables[name] = pd.concat(tolerance_frames, ignore_index=True)
+
+    return summarized_tables
 
 
 def tolerance_sweep_evaluation(
@@ -165,7 +197,6 @@ def tolerance_sweep_evaluation(
     training_style: str,
     *,
     training_epsilon: float = 0.0,
-    as_deltas: bool = False,
     attack_type="pgd",
 ) -> dict[str, pd.DataFrame]:
     """
@@ -187,7 +218,6 @@ def tolerance_sweep_evaluation(
             model_save_dir=fair_adversarial_root(metric, tolerance),
             training_epsilon=training_epsilon,
             tolerance=tolerance,
-            as_deltas=as_deltas,
             attack_type=attack_type,
         )
 

@@ -36,7 +36,6 @@ def main():
         model_save_dir=saved_model_loc,
         training_epsilon=config["training_epsilon"],
         tolerance=_TOLERANCE,
-        as_deltas=False,
     )
 
     for name, table in metrics_dict.items():

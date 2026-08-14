@@ -24,7 +24,6 @@ def main():
         config["seed_sweep"],
         training_style="baseline",
         model_save_dir=saved_model_loc,
-        as_deltas=False,
         attack_type=config["attack_type"],
     )
 

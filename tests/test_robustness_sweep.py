@@ -2,7 +2,11 @@ import torch
 import pytest
 
 import fair_safe_opt.evaluation.robustness as robustness
-from fair_safe_opt.evaluation.robustness import evaluation_sweep, tolerance_sweep_evaluation
+from fair_safe_opt.evaluation.robustness import (
+    evaluation_sweep,
+    summarize_evaluation_sweep,
+    tolerance_sweep_evaluation,
+)
 from fair_safe_opt.utils.paths import (
     fair_adversarial_root,
     fair_adversarial_run_dir,
@@ -92,11 +96,28 @@ def test_evaluation_sweep_returns_group_tables(monkeypatch, tmp_path) -> None:
 
     assert set(tables) == {"combined", "group_0", "group_1"}
     for table in tables.values():
-        assert len(table) == len(_ARCHITECTURES) * len(_EPSILONS)
+        assert len(table) == len(_ARCHITECTURES) * len(_EPSILONS) * len(_SEEDS)
         assert "group" not in table.columns
+        assert list(table["seed"].unique()) == _SEEDS
+
+    # The persisted contract retains per-seed decimal metrics.
+    combined = tables["combined"].set_index(["architecture", "epsilon", "seed"])
+    assert combined.loc[("logistic", 0.0, 0), "balanced_accuracy"] == 0.5
+    assert combined.loc[("logistic", 0.0, 0), "auc"] == 0.5
+
+
+def test_summarize_evaluation_sweep_averages_and_scores(monkeypatch, tmp_path) -> None:
+    patch_heavy_dependencies(monkeypatch, tmp_path)
+    make_checkpoints(tmp_path)
+    raw_tables = evaluation_sweep(
+        _ARCHITECTURES, _EPSILONS, _SEEDS, _TRAINING_STYLE, model_save_dir=tmp_path
+    )
+    tables = summarize_evaluation_sweep(raw_tables)
+
+    for table in tables.values():
+        assert len(table) == len(_ARCHITECTURES) * len(_EPSILONS)
         assert "seed" not in table.columns
 
-    # Scores are percentages; the fake model predicts group 0 perfectly.
     combined = tables["combined"].set_index(["architecture", "epsilon"])
     assert combined.loc[("logistic", 0.0), "balanced_accuracy"] == 50.0
     assert combined.loc[("logistic", 0.0), "auc"] == 50.0
@@ -122,9 +143,10 @@ def test_evaluation_sweep_deltas_are_zero_when_attack_changes_nothing(
     patch_heavy_dependencies(monkeypatch, tmp_path, model_cls=FakePerfectModel)
     make_checkpoints(tmp_path)
 
-    tables = evaluation_sweep(
-        _ARCHITECTURES, _EPSILONS, _SEEDS, _TRAINING_STYLE, model_save_dir=tmp_path, as_deltas=True
+    raw_tables = evaluation_sweep(
+        _ARCHITECTURES, _EPSILONS, _SEEDS, _TRAINING_STYLE, model_save_dir=tmp_path
     )
+    tables = summarize_evaluation_sweep(raw_tables, as_deltas=True)
 
     for name, table in tables.items():
         metric_cols = [col for col in table.columns if col not in ["architecture", "epsilon"]]
@@ -250,10 +272,16 @@ def test_tolerance_sweep_evaluation_tags_rows_with_tolerance(monkeypatch, tmp_pa
 
     assert set(tables) == {"combined", "group_0", "group_1"}
     for table in tables.values():
-        assert len(table) == len(_TOLERANCES) * len(_ARCHITECTURES) * len(_EPSILONS)
+        assert len(table) == (len(_TOLERANCES) * len(_ARCHITECTURES) * len(_EPSILONS) * len(_SEEDS))
         assert list(table["tolerance"].unique()) == _TOLERANCES
+        assert list(table["seed"].unique()) == _SEEDS
 
-    combined = tables["combined"].set_index(["tolerance", "architecture", "epsilon"])
+    summarized = summarize_evaluation_sweep(tables)
+    for table in summarized.values():
+        assert len(table) == len(_TOLERANCES) * len(_ARCHITECTURES) * len(_EPSILONS)
+        assert "seed" not in table.columns
+
+    combined = summarized["combined"].set_index(["tolerance", "architecture", "epsilon"])
     assert combined.loc[(_TOLERANCES[0], "logistic", 0.0), "balanced_accuracy"] == 50.0
 
 

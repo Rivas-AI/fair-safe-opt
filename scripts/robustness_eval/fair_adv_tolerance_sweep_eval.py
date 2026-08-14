@@ -32,7 +32,6 @@ def main():
         _FAIRNESS_METRIC,
         training_style="dp_fair",
         training_epsilon=config["training_epsilon"],
-        as_deltas=False,
     )
 
     for name, table in metrics_dict.items():

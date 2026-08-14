@@ -42,7 +42,6 @@ def main():
         training_style=_TRAINING_STYLE,
         model_save_dir=saved_model_loc,
         training_epsilon=config["training_epsilon"],
-        as_deltas=False,
     )
 
     for name, table in metrics_dict.items():
