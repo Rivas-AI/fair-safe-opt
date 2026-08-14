@@ -1,0 +1,22 @@
+#Standard training params
+architecture_sweep: ['logistic', 'small_mlp']
+epsilon_sweep: [0.0, 0.1, 0.2, 0.3]
+seed_sweep: [0, 1, 2]
+epochs: 40
+patience: 10
+hidden_dim: 64
+dropout: 0.0
+learning_rate: .0001
+threshold: 0.5
+device: cpu
+
+# Adversarial training
+training_epsilon: 0.3
+steps: 10
+
+# Fairness
+fairness_metric: 'dp'
+tolerance_sweep: [0.025, 0.02, 0.015, 0.01, 0.005]
+initial_multiplier: 0.0
+initial_penalty: 0.1
+dual_lr: 1.0

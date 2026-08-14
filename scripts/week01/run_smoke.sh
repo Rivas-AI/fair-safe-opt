@@ -26,10 +26,12 @@ history = train_erm(
     model,
     dataset.x,
     dataset.y,
+    dataset.x_val,
+    dataset.y_val,
     epochs=int(train_cfg["epochs"]),
     batch_size=int(data_cfg["batch_size"]),
     learning_rate=float(train_cfg["learning_rate"]),
 )
-metrics = evaluate_binary_classifier(model, dataset.x, dataset.y, dataset.sensitive)
-print({"final_loss": history.losses[-1], **metrics})
+metrics = evaluate_binary_classifier(model, dataset.x_val, dataset.y_val, dataset.sensitive_val)
+print({"final_loss": history.train_losses[-1], **metrics})
 PY

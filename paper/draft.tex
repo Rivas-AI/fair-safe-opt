@@ -219,7 +219,7 @@ Both baseline models suffer balanced accuracy and auc reductions when tested on 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{Act 1/fgsm_vs_pgd.png}
+    \includegraphics[width=0.75\linewidth]{../results/tables/fgsm_vs_pgd.png}
     \caption{Balanced accuracy vs. increasing epsilon values for both FGSM and PGD attacks}
     \label{fig:pgd_vs_fgsm}
 \end{figure}
@@ -230,7 +230,7 @@ Since PGD performs at least as well as FGSM for our models we decided to only fo
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{Act 1/dp_eopp_baselines.png}
+    \includegraphics[width=0.75\linewidth]{../results/robustness/baseline/dp_eopp_baselines.png}
     \caption{Baseline DPD and Eopp Metrics with Standard Deviation and Increasing Epsilon}
     \label{fig:baseline_fairness}
 \end{figure}
@@ -238,7 +238,7 @@ At baseline, we can see that DPD is increasing with high stability between runs,
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{Act 1/act1_per_group.png}
+    \includegraphics[width=0.75\linewidth]{../results/robustness/baseline/act1_per_group.png}
     \caption{Per-Group PPR and Advantaged TPR for Baseline Models}
     \label{fig:act1_per_group}
 \end{figure}
@@ -258,9 +258,9 @@ Adversarial training resulted in marked increases in balanced accuracy when test
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\linewidth]{}
+    \includegraphics[width=0.75\linewidth]{../results/tables/act2acc.png}
     \caption{Accuracy}
-    \label{fig:act1_per_group}
+    \label{fig:act2_accuracy}
 \end{figure} 
 
 % - DP & EOpp vs baseline

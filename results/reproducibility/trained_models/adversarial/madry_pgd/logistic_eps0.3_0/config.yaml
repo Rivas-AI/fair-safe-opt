@@ -1,0 +1,5 @@
+architecture: logistic
+dropout: 0.0
+hidden_dim: 64
+seed: 0
+training_epsilon: 0.3

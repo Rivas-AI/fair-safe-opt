@@ -1,0 +1,113 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{hyperref}
+
+\title{\textbf{Baseline Results Summary}\\[0.4em]
+       \large Adult Income Dataset --- ERM Baselines\\
+       \normalsize 2026-06-18}
+\author{ACQUA / fair-safe-opt}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent
+Two architectures (\texttt{logistic}, \texttt{small\_mlp}) trained with empirical risk minimisation (ERM) on seeds 0, 1, 2.
+Values reported as mean $\pm$ std across seeds.
+Sensitive attribute: sex (Group~0 = Men, Group~1 = Women).
+
+% ---------- Overall metrics ----------
+\section*{Overall Metrics}
+
+\begin{table}[h]
+\centering
+\caption{Combined (all groups) test-set metrics.}
+\begin{tabular}{lcccc}
+\toprule
+Model & Accuracy & ROC AUC & Dem.\ Parity Diff. & Equal Opp.\ Diff. \\
+\midrule
+Logistic   & $0.8339 \pm 0.0018$ & $0.8939 \pm 0.0031$ & $0.1798 \pm 0.0028$ & $0.2308 \pm 0.0125$ \\
+Small MLP  & $0.8527 \pm 0.0016$ & $0.9086 \pm 0.0031$ & $0.1928 \pm 0.0117$ & $0.0976 \pm 0.0421$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------- Group 0 ----------
+\section*{Group 0 --- Men}
+
+\begin{table}[h]
+\centering
+\caption{Test-set metrics for Group~0 (Men).}
+\begin{tabular}{lccc}
+\toprule
+Model & Accuracy & ROC AUC & TPR \\
+\midrule
+Logistic   & $0.7964 \pm 0.0014$ & $0.8687 \pm 0.0050$ & $0.5335 \pm 0.0015$ \\
+Small MLP  & $0.8167 \pm 0.0022$ & $0.8857 \pm 0.0043$ & $0.6538 \pm 0.0166$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------- Group 1 ----------
+\section*{Group 1 --- Women}
+
+\begin{table}[h]
+\centering
+\caption{Test-set metrics for Group~1 (Women).}
+\begin{tabular}{lccc}
+\toprule
+Model & Accuracy & ROC AUC & TPR \\
+\midrule
+Logistic   & $0.9100 \pm 0.0038$ & $0.9198 \pm 0.0014$ & $0.3027 \pm 0.0139$ \\
+Small MLP  & $0.9257 \pm 0.0038$ & $0.9341 \pm 0.0018$ & $0.5562 \pm 0.0287$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------- Per-seed breakdown ----------
+\section*{Per-Seed Breakdown}
+
+\begin{table}[h]
+\centering
+\caption{Individual seed results --- Logistic.}
+\begin{tabular}{ccccccccccc}
+\toprule
+Seed & Acc & AUC & DPD & EOD & G0 Acc & G0 AUC & G0 TPR & G1 Acc & G1 AUC & G1 TPR \\
+\midrule
+0 & 0.8331 & 0.8896 & 0.1787 & 0.2147 & 0.7947 & 0.8616 & 0.5357 & 0.9096 & 0.9213 & 0.3209 \\
+1 & 0.8322 & 0.8953 & 0.1770 & 0.2323 & 0.7962 & 0.8729 & 0.5326 & 0.9056 & 0.9180 & 0.3003 \\
+2 & 0.8364 & 0.8968 & 0.1837 & 0.2453 & 0.7982 & 0.8715 & 0.5323 & 0.9149 & 0.9201 & 0.2870 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Individual seed results --- Small MLP.}
+\begin{tabular}{ccccccccccc}
+\toprule
+Seed & Acc & AUC & DPD & EOD & G0 Acc & G0 AUC & G0 TPR & G1 Acc & G1 AUC & G1 TPR \\
+\midrule
+0 & 0.8510 & 0.9049 & 0.1772 & 0.0553 & 0.8135 & 0.8798 & 0.6313 & 0.9258 & 0.9341 & 0.5759 \\
+1 & 0.8521 & 0.9084 & 0.2054 & 0.1551 & 0.8183 & 0.8872 & 0.6707 & 0.9210 & 0.9319 & 0.5156 \\
+2 & 0.8549 & 0.9125 & 0.1959 & 0.0824 & 0.8182 & 0.8900 & 0.6595 & 0.9304 & 0.9363 & 0.5772 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------- Notes ----------
+\section*{Notes}
+
+\begin{itemize}
+  \item Training: ERM, up to 10 epochs, early stopping patience = 5, lr = $10^{-4}$.
+  \item Small MLP: hidden dim = 64, dropout = 0.0.
+  \item Data splits seeded per run (\texttt{random\_state = seed}).
+  \item DPD = Demographic Parity Difference; EOD = Equal Opportunity Difference; TPR = True Positive Rate.
+  \item The logistic model shows a large TPR gap between men (0.53) and women (0.30), indicating the model classifies high-income women at a much lower rate despite similar overall accuracy.
+  \item The small MLP closes the TPR gap substantially (0.65 vs.\ 0.56) while also improving overall accuracy and AUC.
+\end{itemize}
+
+\end{document}

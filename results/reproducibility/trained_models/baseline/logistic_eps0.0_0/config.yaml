@@ -1,0 +1,4 @@
+architecture: logistic
+dropout: 0.0
+hidden_dim: 64
+seed: 0

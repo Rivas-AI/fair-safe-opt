@@ -1,0 +1,9 @@
+architecture,epsilon,balanced_accuracy,auc,advantaged_tpr,atk_success
+logistic,0.0,68.25,79.48,52.02,0.0
+logistic,0.1,51.53,59.34,31.89,20.79
+logistic,0.2,35.77,38.87,14.14,40.99
+logistic,0.3,25.47,22.61,4.84,55.36
+small_mlp,0.0,77.65,88.55,66.18,0.0
+small_mlp,0.1,28.95,16.96,10.12,56.08
+small_mlp,0.2,11.48,3.62,3.4,82.3
+small_mlp,0.3,4.27,2.47,2.54,94.0

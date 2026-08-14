@@ -19,7 +19,16 @@ data/cache/
 data/processed/
 results/**
 !results/README.md
-results/runs/f4
+!results/**/
+!results/**/*.csv
+!results/**/*.json
+!results/**/*.yaml
+!results/**/*.yml
+!results/**/*.tsv
+!results/**/*.tex
+!results/**/*.md
+!results/**/*.png
+!results/**/*.pdf
 outputs/
 checkpoints/
 trained_models/**
@@ -37,3 +46,16 @@ data/**
 .DS_Store
 .vscode/
 .idea/
+.claude/
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.toc
